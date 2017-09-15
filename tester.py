@@ -1,5 +1,6 @@
 """
 """
+
 from pathlib import Path
 import difflib
 import os
@@ -8,6 +9,10 @@ import subprocess
 import sys
 import urllib.request
 
+DIFF_TYPE=difflib.unified_diff
+DIFF_TYPE=difflib.context_diff
+
+ASSIGNMENT="a3"
 PROGRAM="rhymes.py"
 
 def find_python():
@@ -30,6 +35,11 @@ def find_python():
 
     print("Oops! Can't figure out how to run Python 3!")
 
+def print_dot():
+    print(".", end="")
+    sys.stdout.flush()
+
+
 def build_test_dir(url):
     """Build the test directory, if needed.
         Cases:
@@ -46,6 +56,8 @@ def build_test_dir(url):
 but you've got a file named 'test'.  Remove it and run me again.""")
         sys.exit(1)
 
+    print("Building test directory", end="")
+    sys.stdout.flush()
     try:
         test_dir.mkdir()
     except Exception as e:
@@ -59,12 +71,16 @@ but you've got a file named 'test'.  Remove it and run me again.""")
         for m in re.finditer(r'>input-([0-9]+)\.txt<',str(s)):
             testnum = m.group(1)
             for fname in ["{}-{}.txt".format(name, testnum) for name in ["input","expected"]]:
-                print(fname)
+                #print(fname)
                 copy_test_file(url, test_dir, fname)
+                print_dot()
 
     with urllib.request.urlopen(url + "/" + "testfiles.txt") as f:
         for fname in f.readlines():
             copy_test_file(url, test_dir, fname.decode().strip())
+            print_dot()
+
+    print("Done!")
 
 def copy_test_file(url, test_dir, fname):
     with urllib.request.urlopen(url + "/" + fname) as testurl:
@@ -87,7 +103,7 @@ def show_file(fname):
 def get_tests():
     result = []
     for input_file in Path("test").glob("input-*.txt"):
-        print(str(input_file))
+        #print(str(input_file))
         match = re.match(r'test[/\\]input-([0-9]+).txt', str(input_file))
         result.append(match.group(1))
 
@@ -96,7 +112,7 @@ def get_tests():
 def run_tests():
     python_command = find_python()
     for testnum in get_tests():
-        print("Running test", testnum)
+        print("\nRunning test {}...".format(testnum), end="")
         stdin_fname = "test/input-{}.txt".format(testnum)
         actual_fname = "test/actual-{}.txt".format(testnum)
         stdin = open(stdin_fname,"r")
@@ -111,11 +127,21 @@ def run_tests():
         actual_lines = actual_file.readlines()
         expected_file.close()
         actual_file.close()
-        sys.stdout.writelines(difflib.context_diff(expected_lines, actual_lines, fromfile=expected_fname, tofile=actual_fname))
+        diff = DIFF_TYPE(expected_lines, actual_lines, fromfile=expected_fname, tofile=actual_fname)
+        diff_str = ""
+        for line in diff:
+            diff_str += line
+            
+        if len(diff_str) == 0:
+            print("PASSED")
+        else:
+            print("FAILED")
+            print(diff_str)
+        
         
 def main():
     #print(sys.version)
-    build_test_dir('http://www2.cs.arizona.edu/~whm/120/a3')
+    build_test_dir('http://www2.cs.arizona.edu/~whm/120/{}'.format(ASSIGNMENT))
     run_tests()
 
 main()
