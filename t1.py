@@ -6,6 +6,9 @@ import sys
 import urllib.request
 import re
 from pathlib import Path
+import difflib
+
+PROGRAM="rhymes.py"
 
 def find_python():
     """Return a command that will run Python 3"""
@@ -73,14 +76,45 @@ def show_file(fname):
     except Exception as e:
         print(e)
 
-def main():
+def get_tests():
+    result = []
+    for input_file in Path("test").glob("input-*.txt"):
+        print(str(input_file))
+        match = re.match("test/input-([0-9]+).txt", str(input_file))
+        result.append(match.group(1))
+
+    return result
+
+def run_tests():
     python_command = find_python()
-    print(sys.version)
+    for testnum in get_tests():
+        print("Running test", testnum)
+        stdin_fname = "test/input-{}.txt".format(testnum)
+        actual_fname = "test/actual-{}.txt".format(testnum)
+        stdin = open(stdin_fname,"r")
+        actual_file = open(actual_fname,"w")
+        rc = subprocess.call([python_command, PROGRAM], stdin=stdin, stdout=actual_file, stderr=subprocess.STDOUT)
+        stdin.close()
+        actual_file.close()
+        expected_fname = "test/expected-{}.txt".format(testnum)
+        expected_file = open(expected_fname, "r")
+        actual_file = open(actual_fname,"r")
+        expected_lines = expected_file.readlines()
+        actual_lines = actual_file.readlines()
+        expected_file.close()
+        actual_file.close()
+        sys.stdout.writelines(difflib.context_diff(expected_lines, actual_lines, fromfile=expected_fname, tofile=actual_fname))
+        
+def main():
+    #print(sys.version)
+    build_test_dir('http://www2.cs.arizona.edu/~whm/120/a3')
+    run_tests()
+    """
     infile = open("in.1","r")
     out = open("out.1","w")
     rc = subprocess.call([python_command,"test_seq.py"], stdin=infile, stdout=out, stderr=subprocess.STDOUT)
     print("rc =", rc)
     show_file("out.1")
+    """
 
-#main()
-build_test_dir('http://www2.cs.arizona.edu/~whm/120/a3')
+main()
