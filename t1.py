@@ -83,7 +83,7 @@ def get_tests():
         match = re.match(r'test[/\\]input-([0-9]+).txt', str(input_file))
         result.append(match.group(1))
 
-    return result
+    return sorted(result)
 
 def run_tests():
     python_command = find_python()
