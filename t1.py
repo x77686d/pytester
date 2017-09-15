@@ -80,7 +80,7 @@ def get_tests():
     result = []
     for input_file in Path("test").glob("input-*.txt"):
         print(str(input_file))
-        match = re.match("test/input-([0-9]+).txt", str(input_file))
+        match = re.match(r'test[/\\]input-([0-9]+).txt', str(input_file))
         result.append(match.group(1))
 
     return result
