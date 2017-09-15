@@ -1,17 +1,26 @@
 """
 """
+from pathlib import Path
+import difflib
+import os
+import re
 import subprocess
 import sys
 import urllib.request
-import re
-from pathlib import Path
-import difflib
 
 PROGRAM="rhymes.py"
 
 def find_python():
     """Return a command that will run Python 3"""
-    for command in ["pythonw","python3","python"]:
+    python_commands = ["python3","python"]
+
+    #
+    # Only look for pythonw if running on Windows
+    #
+    if os.name == "nt":
+        python_commands.insert(0, "pythonw")
+        
+    for command in python_commands:
         try:
             rc = subprocess.call([command, "--version"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             if rc == 0:
