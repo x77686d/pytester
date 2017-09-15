@@ -4,9 +4,12 @@ import sys
 def find_python():
     """Return a command that will run Python 3"""
     for command in ["python3","python"]:
-        rc = subprocess.call([command, "--version"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        if rc == 0:
-            return command
+        try:
+            rc = subprocess.call([command, "--version"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            if rc == 0:
+                return command
+        except:
+            pass
 
     print("OOPS! Can't figure out how to run Python 3!")
 
