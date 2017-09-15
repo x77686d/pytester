@@ -49,12 +49,19 @@ but you've got a file named 'test'.  Remove it and run me again.""")
             testnum = m.group(1)
             for fname in ["{}-{}.txt".format(name, testnum) for name in ["input","expected"]]:
                 print(fname)
-                with urllib.request.urlopen(url + "/" + fname) as testurl:
-                    testfilepath = test_dir / fname
-                    testfile = testfilepath.open(mode="wb")
-                    testfile.write(testurl.read())
-                    testfile.close()
-            
+                copy_test_file(url, test_dir, fname)
+
+    with urllib.request.urlopen(url + "/" + "testfiles.txt") as f:
+        for fname in f.readlines():
+            copy_test_file(url, test_dir, fname.decode().strip())
+
+def copy_test_file(url, test_dir, fname):
+    with urllib.request.urlopen(url + "/" + fname) as testurl:
+        testfilepath = test_dir / fname
+        testfile = testfilepath.open(mode="wb")
+        testfile.write(testurl.read())
+        testfile.close()
+
 
 
 def show_file(fname):
