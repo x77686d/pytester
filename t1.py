@@ -1,5 +1,4 @@
 """
-Look for testing directory and if not present, populate it with current contents
 """
 import subprocess
 import sys
@@ -12,7 +11,7 @@ PROGRAM="rhymes.py"
 
 def find_python():
     """Return a command that will run Python 3"""
-    for command in ["python3","python"]:
+    for command in ["pythonw","python3","python"]:
         try:
             rc = subprocess.call([command, "--version"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             if rc == 0:
@@ -109,12 +108,5 @@ def main():
     #print(sys.version)
     build_test_dir('http://www2.cs.arizona.edu/~whm/120/a3')
     run_tests()
-    """
-    infile = open("in.1","r")
-    out = open("out.1","w")
-    rc = subprocess.call([python_command,"test_seq.py"], stdin=infile, stdout=out, stderr=subprocess.STDOUT)
-    print("rc =", rc)
-    show_file("out.1")
-    """
 
 main()
