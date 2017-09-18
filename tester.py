@@ -9,11 +9,15 @@ import subprocess
 import sys
 import urllib.request
 
+CONFIG={
+    'a3': ["rhymes.py"],
+    'a4': ["biodiversity.py", "abundance.py"]
+    }
+
 DIFF_TYPE=difflib.unified_diff
 DIFF_TYPE=difflib.context_diff
 
-ASSIGNMENT="a3"
-PROGRAM="rhymes.py"
+TEST_FILE_URL="http://www2.cs.arizona.edu/~whm/120"
 
 def find_python():
     """Return a command that will run Python 3"""
@@ -100,27 +104,26 @@ def show_file(fname):
     except Exception as e:
         print(e)
 
-def get_tests():
+def get_tests(program):
     result = []
-    for input_file in Path("test").glob("input-*.txt"):
+    for input_file in Path("test").glob(program + "-input-*.txt"):
         #print(str(input_file))
-        match = re.match(r'test[/\\]input-([0-9]+).txt', str(input_file))
+        match = re.match(r'test[/\\].*-input-([0-9]+).txt', str(input_file))
         result.append(match.group(1))
 
     return sorted(result)
 
-def run_tests():
-    python_command = find_python()
-    for testnum in get_tests():
-        print("\nRunning test {}...".format(testnum), end="")
-        stdin_fname = "test/input-{}.txt".format(testnum)
-        actual_fname = "test/actual-{}.txt".format(testnum)
+def run_tests(program, python_command):
+    for testnum in get_tests(program):
+        print("\n{}: Running test {}...".format(program, testnum), end="")
+        stdin_fname = "test/{}-input-{}.txt".format(program, testnum)
+        actual_fname = "test/{}-actual-{}.txt".format(program, testnum)
         stdin = open(stdin_fname,"r")
         actual_file = open(actual_fname,"w")
-        rc = subprocess.call([python_command, PROGRAM], stdin=stdin, stdout=actual_file, stderr=subprocess.STDOUT)
+        rc = subprocess.call([python_command, program + ".py"], stdin=stdin, stdout=actual_file, stderr=subprocess.STDOUT)
         stdin.close()
         actual_file.close()
-        expected_fname = "test/expected-{}.txt".format(testnum)
+        expected_fname = "test/{}-expected-{}.txt".format(program, testnum)
         expected_file = open(expected_fname, "r")
         actual_file = open(actual_fname,"r")
         expected_lines = expected_file.readlines()
@@ -140,8 +143,15 @@ def run_tests():
         
         
 def main():
-    #print(sys.version)
-    build_test_dir('http://www2.cs.arizona.edu/~whm/120/{}'.format(ASSIGNMENT))
-    run_tests()
+    assignment=sys.argv[0].split("/")[-1].split("-")[0]
+    if assignment not in CONFIG:
+        print("Oops! Can't figure out assignment number for tester named '{}'".format(sys.argv[0]))
+        sys.exit(1)
+        
+    build_test_dir(TEST_FILE_URL + assignment)
+    python_command = find_python()
+    for program in CONFIG[assignment]:
+        program = program.split(".")[0]
+        run_tests(program, python_command)
 
 main()
