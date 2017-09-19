@@ -8,6 +8,8 @@ import re
 import subprocess
 import sys
 import urllib.request
+import argparse
+        
 
 CONFIG={
     'a3': ["rhymes.py"],
@@ -17,7 +19,7 @@ CONFIG={
 DIFF_TYPE=difflib.unified_diff
 DIFF_TYPE=difflib.context_diff
 
-TEST_FILE_URL="http://www2.cs.arizona.edu/~whm/120"
+TEST_FILE_URL="http://www2.cs.arizona.edu/~whm/120/"
 
 def find_python():
     """Return a command that will run Python 3"""
@@ -63,28 +65,34 @@ but you've got a file named 'test'.  Remove it and run me again.""")
     print("Building test directory", end="")
     sys.stdout.flush()
     try:
-        test_dir.mkdir()
-    except Exception as e:
-        print("Oops!  Tried to create directory 'test' but failed with this:")
-        print(e)
-        sys.exit(1)
-    
-    with urllib.request.urlopen(url) as f:
-        s = f.read()
-        #print(s)
-        for m in re.finditer(r'>input-([0-9]+)\.txt<',str(s)):
-            testnum = m.group(1)
-            for fname in ["{}-{}.txt".format(name, testnum) for name in ["input","expected"]]:
-                #print(fname)
-                copy_test_file(url, test_dir, fname)
+        try:
+            test_dir.mkdir()
+        except Exception as e:
+            print("Oops!  Tried to create directory 'test' but failed with this:")
+            print(e)
+            sys.exit(1)
+        
+        with urllib.request.urlopen(url) as f:
+            s = f.read()
+            #print(s)
+            for m in re.finditer(r'>(\w+)-input-([0-9]+)\.txt<',str(s)):
+                program = m.group(1)
+                testnum = m.group(2)
+                for fname in ["{}-{}-{}.txt".format(program, name, testnum) for name in ["input","expected"]]:
+                    #print(fname)
+                    copy_test_file(url, test_dir, fname)
+                    print_dot()
+
+        with urllib.request.urlopen(url + "/" + "testfiles.txt") as f:
+            for fname in f.readlines():
+                if fname[0] == "#":
+                    continue
+                copy_test_file(url, test_dir, fname.decode().strip())
                 print_dot()
-
-    with urllib.request.urlopen(url + "/" + "testfiles.txt") as f:
-        for fname in f.readlines():
-            copy_test_file(url, test_dir, fname.decode().strip())
-            print_dot()
-
-    print("Done!")
+    
+        print("Done!")
+    except urllib.error.HTTPError as e:
+        print("Oops! HTTPError, url='{}', code='{}', message='{}'".format(e.geturl(),e.getcode(),e.msg))
 
 def copy_test_file(url, test_dir, fname):
     with urllib.request.urlopen(url + "/" + fname) as testurl:
