@@ -13,7 +13,7 @@ import argparse
 
 CONFIG={
     'a3': ["rhymes.py"],
-    'a4': ["biodiversity.py", "abundance.py"]
+    'a4': ["abundance.py", "biodiversity.py"]
     }
 
 DIFF_TYPE=difflib.unified_diff
@@ -151,7 +151,8 @@ def run_tests(program, python_command):
         
         
 def main():
-    assignment=sys.argv[0].split("/")[-1].split("-")[0]
+    assignment=re.split(r'[/\\]',sys.argv[0])[-1].split("-")[0]  # todo: switch to os-independent path handling
+
     if assignment not in CONFIG:
         print("Oops! Can't figure out assignment number for tester named '{}'".format(sys.argv[0]))
         sys.exit(1)
