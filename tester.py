@@ -1,4 +1,8 @@
 """
+Check test directory for correct assignment.
+Be sure we're running Python 3
+    sys.version_info.major == 3
+    sys.executable
 """
 
 from pathlib import Path
@@ -21,30 +25,9 @@ DIFF_TYPE=difflib.context_diff
 
 TEST_FILE_URL="http://www2.cs.arizona.edu/~whm/120/"
 
-def find_python():
-    """Return a command that will run Python 3"""
-    python_commands = ["python3","python"]
-
-    #
-    # Only look for pythonw if running on Windows
-    #
-    if os.name == "nt":
-        python_commands.insert(0, "pythonw")
-        
-    for command in python_commands:
-        try:
-            rc = subprocess.call([command, "--version"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-            if rc == 0:
-                return command
-        except:
-            pass
-
-    print("Oops! Can't figure out how to run Python 3!")
-
 def print_dot():
     print(".", end="")
     sys.stdout.flush()
-
 
 def build_test_dir(url):
     """Build the test directory, if needed.
@@ -121,14 +104,14 @@ def get_tests(program):
 
     return sorted(result)
 
-def run_tests(program, python_command):
+def run_tests(program):
     for testnum in get_tests(program):
         print("\n{}: Running test {}...".format(program, testnum), end="")
         stdin_fname = "test/{}-input-{}.txt".format(program, testnum)
         actual_fname = "test/{}-actual-{}.txt".format(program, testnum)
         stdin = open(stdin_fname,"r")
         actual_file = open(actual_fname,"w")
-        rc = subprocess.call([python_command, program + ".py"], stdin=stdin, stdout=actual_file, stderr=subprocess.STDOUT)
+        rc = subprocess.call([sys.executable, program + ".py"], stdin=stdin, stdout=actual_file, stderr=subprocess.STDOUT)
         stdin.close()
         actual_file.close()
         expected_fname = "test/{}-expected-{}.txt".format(program, testnum)
@@ -158,9 +141,8 @@ def main():
         sys.exit(1)
         
     build_test_dir(TEST_FILE_URL + assignment)
-    python_command = find_python()
     for program in CONFIG[assignment]:
         program = program.split(".")[0]
-        run_tests(program, python_command)
+        run_tests(program)
 
 main()
