@@ -1,8 +1,17 @@
 """
 Check test directory for correct assignment.
+    version.txt
+        a4-1.txt
+        remove when starting download
+
+Handle sorting
+
 Be sure we're running Python 3
     sys.version_info.major == 3
     sys.executable
+    a0-tester.py
+        prints sys.executable, sys.version
+        
 """
 
 from pathlib import Path
@@ -13,78 +22,118 @@ import subprocess
 import sys
 import urllib.request
 import argparse
-        
+import shutil        
 
 CONFIG={
     'a3': ["rhymes.py"],
-    'a4': ["abundance.py", "biodiversity.py"]
+    'a4': ["abundance.py", "biodiversity.py"],
+    'a5': ["ngrams.py", "bball.py"],
+    'a6': ["p1.py"],
+    'ver': ["version.py"]
     }
 
+#
+# Swap these to get a unified diff
 DIFF_TYPE=difflib.unified_diff
 DIFF_TYPE=difflib.context_diff
 
-TEST_FILE_URL="http://www2.cs.arizona.edu/~whm/120/"
+TESTER_URL_ROOT="http://www2.cs.arizona.edu/~whm/120/"
 
 def print_dot():
     print(".", end="")
     sys.stdout.flush()
 
-def build_test_dir(url):
+def ensure_test_dir_current(assignment):
     """Build the test directory, if needed.
         Cases:
             Doesn't exist: make directory and populate it
             Exists: do nothing
             Exists but is a file: tell the user
     """
-    test_dir = Path("test")
-    if test_dir.is_dir():
-        return
 
-    if test_dir.is_file():
-        print("""Oops!  The tester needs to create a directory named 'test'
-but you've got a file named 'test'.  Remove it and run me again.""")
+    test_dir = Path("test-" + assignment)
+    assignment_url = TESTER_URL_ROOT + assignment + "/"
+    
+    if test_dir.exists() and not test_dir.is_dir():
+        print("""Oops!  The tester needs to create a directory named '{0}' but you've got a file (or something else) named '{0}'.  Remove it or rename it and run me again.""".format(test_dir))
         sys.exit(1)
 
-    print("Building test directory", end="")
-    sys.stdout.flush()
-    try:
-        try:
-            test_dir.mkdir()
-        except Exception as e:
-            print("Oops!  Tried to create directory 'test' but failed with this:")
-            print(e)
-            sys.exit(1)
-        
-        with urllib.request.urlopen(url) as f:
-            s = f.read()
-            #print(s)
-            for m in re.finditer(r'>(\w+)-input-([0-9]+)\.txt<',str(s)):
-                program = m.group(1)
-                testnum = m.group(2)
-                for fname in ["{}-{}-{}.txt".format(program, name, testnum) for name in ["input","expected"]]:
-                    #print(fname)
-                    copy_test_file(url, test_dir, fname)
-                    print_dot()
+    if test_dir.is_dir() and test_dir_current(test_dir, assignment_url):
+        print("up to date!")
+        return
+    else:
+        build_test_directory(test_dir, assignment_url)
 
-        with urllib.request.urlopen(url + "/" + "testfiles.txt") as f:
-            for fname in f.readlines():
-                if fname[0] == "#":
-                    continue
-                copy_test_file(url, test_dir, fname.decode().strip())
-                print_dot()
-    
-        print("Done!")
+
+def test_dir_current(test_dir, assignment_url):
+    try:
+        my_version = (test_dir / "version.txt").read_text().strip()
+    except FileNotFoundError:
+        return False
+
+    expected_version = get_remote_file_contents(assignment_url + "version.txt").decode().strip()
+
+    #print("my_version",my_version,"expected_version",expected_version)
+
+    return my_version == expected_version
+
+def get_remote_file_contents(url):
+    try:
+        contents = urllib.request.urlopen(url).read()
+        return contents
     except urllib.error.HTTPError as e:
         print("Oops! HTTPError, url='{}', code='{}', message='{}'".format(e.geturl(),e.getcode(),e.msg))
+        sys.exit(1)
+
+def build_test_directory(test_dir, assignment_url):
+    print("Building test directory", end="")
+    sys.stdout.flush()
+
+    if test_dir.is_dir():
+        shutil.rmtree(test_dir.as_posix())
+    
+    # If test directory exists, remove it.  Then build it.
+
+    try:
+        test_dir.mkdir()
+    except Exception as e:
+        print("Oops!  Tried to create directory '{}' but failed with this:".format(test_dir))
+        print(e)
+        sys.exit(1)
+
+    try:
+        f = urllib.request.urlopen(assignment_url)
+        s = f.read()
+        #print(s)
+        for m in re.finditer(r'>(\w+)-input-([0-9]+)\.txt<',str(s)):
+            program = m.group(1)
+            testnum = m.group(2)
+            for fname in ["{}-{}-{}.txt".format(program, name, testnum) for name in ["input","expected"]]:
+                #print(fname)
+                copy_test_file(assignment_url, test_dir, fname)
+                print_dot()
+        f.close()
+
+        f = urllib.request.urlopen(assignment_url + "testfiles.txt")
+        for fname in f.readlines():
+            if fname[0] == "#":
+                continue
+            copy_test_file(assignment_url, test_dir, fname.decode().strip())
+            print_dot()
+
+        copy_test_file(assignment_url, test_dir, "version.txt")
+        print("Done!")
+        
+    except urllib.error.HTTPError as e:
+        print("Oops! HTTPError, url='{}'".format(e.geturl()))
+        print(e)
 
 def copy_test_file(url, test_dir, fname):
-    with urllib.request.urlopen(url + "/" + fname) as testurl:
+    with urllib.request.urlopen(url + fname) as testurl:
         testfilepath = test_dir / fname
         testfile = testfilepath.open(mode="wb")
         testfile.write(testurl.read())
         testfile.close()
-
-
 
 def show_file(fname):
     print("----- Contents of file '{}' -----".format(fname))
@@ -134,13 +183,16 @@ def run_tests(program):
         
         
 def main():
+    print("tester.py, version 1.0")
+    print("Python version:")
+    print(sys.version)
     assignment=re.split(r'[/\\]',sys.argv[0])[-1].split("-")[0]  # todo: switch to os-independent path handling
 
     if assignment not in CONFIG:
         print("Oops! Can't figure out assignment number for tester named '{}'".format(sys.argv[0]))
         sys.exit(1)
         
-    build_test_dir(TEST_FILE_URL + assignment)
+    ensure_test_dir_current(assignment)
     for program in CONFIG[assignment]:
         program = program.split(".")[0]
         run_tests(program)
