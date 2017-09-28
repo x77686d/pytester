@@ -1,8 +1,4 @@
 """
-Check test directory for correct assignment.
-    version.txt
-        a4-1.txt
-        remove when starting download
 
 Handle sorting
 
@@ -28,7 +24,6 @@ CONFIG={
     'a3': ["rhymes.py"],
     'a4': ["abundance.py", "biodiversity.py"],
     'a5': ["ngrams.py", "bball.py"],
-    'a6': ["p1.py"],
     'ver': ["version.py"]
     }
 
@@ -59,11 +54,10 @@ def ensure_test_dir_current(assignment):
         sys.exit(1)
 
     if test_dir.is_dir() and test_dir_current(test_dir, assignment_url):
-        print("up to date!")
+        #print("up to date!")
         return
     else:
         build_test_directory(test_dir, assignment_url)
-
 
 def test_dir_current(test_dir, assignment_url):
     try:
@@ -116,9 +110,10 @@ def build_test_directory(test_dir, assignment_url):
 
         f = urllib.request.urlopen(assignment_url + "testfiles.txt")
         for fname in f.readlines():
-            if fname[0] == "#":
+            fname = fname.decode().strip()
+            if len(fname) == 0 or fname[0] == "#":
                 continue
-            copy_test_file(assignment_url, test_dir, fname.decode().strip())
+            copy_test_file(assignment_url, test_dir, fname)
             print_dot()
 
         copy_test_file(assignment_url, test_dir, "version.txt")
@@ -127,6 +122,7 @@ def build_test_directory(test_dir, assignment_url):
     except urllib.error.HTTPError as e:
         print("Oops! HTTPError, url='{}'".format(e.geturl()))
         print(e)
+        sys.exit(1)
 
 def copy_test_file(url, test_dir, fname):
     with urllib.request.urlopen(url + fname) as testurl:
@@ -144,26 +140,28 @@ def show_file(fname):
     except Exception as e:
         print(e)
 
-def get_tests(program):
+def get_tests(program, assignment):
     result = []
-    for input_file in Path("test").glob(program + "-input-*.txt"):
+    test_dir = "test-" + assignment
+    for input_file in Path(test_dir).glob(program + "-input-*.txt"):
         #print(str(input_file))
-        match = re.match(r'test[/\\].*-input-([0-9]+).txt', str(input_file))
+        match = re.match(test_dir + r'[/\\].*-input-([0-9]+).txt', str(input_file))
         result.append(match.group(1))
 
     return sorted(result)
 
-def run_tests(program):
-    for testnum in get_tests(program):
+def run_tests(program, assignment):
+    test_dir = "test-" + assignment
+    for testnum in get_tests(program, assignment):
         print("\n{}: Running test {}...".format(program, testnum), end="")
-        stdin_fname = "test/{}-input-{}.txt".format(program, testnum)
-        actual_fname = "test/{}-actual-{}.txt".format(program, testnum)
+        stdin_fname = "{}/{}-input-{}.txt".format(test_dir, program, testnum)
+        actual_fname = "{}/{}-actual-{}.txt".format(test_dir, program, testnum)
         stdin = open(stdin_fname,"r")
         actual_file = open(actual_fname,"w")
         rc = subprocess.call([sys.executable, program + ".py"], stdin=stdin, stdout=actual_file, stderr=subprocess.STDOUT)
         stdin.close()
         actual_file.close()
-        expected_fname = "test/{}-expected-{}.txt".format(program, testnum)
+        expected_fname = "{}/{}-expected-{}.txt".format(test_dir, program, testnum)
         expected_file = open(expected_fname, "r")
         actual_file = open(actual_fname,"r")
         expected_lines = expected_file.readlines()
@@ -195,6 +193,6 @@ def main():
     ensure_test_dir_current(assignment)
     for program in CONFIG[assignment]:
         program = program.split(".")[0]
-        run_tests(program)
+        run_tests(program, assignment)
 
 main()
