@@ -1,14 +1,4 @@
-"""
 
-Handle sorting
-
-Be sure we're running Python 3
-    sys.version_info.major == 3
-    sys.executable
-    a0-tester.py
-        prints sys.executable, sys.version
-        
-"""
 
 from pathlib import Path
 import difflib
@@ -20,12 +10,24 @@ import urllib.request
 import argparse
 import shutil        
 
-CONFIG={
-    'a3': ["rhymes.py"],
-    'a4': ["abundance.py", "biodiversity.py"],
-    'a5': ["ngrams.py", "bball.py"],
-    'ver': ["version.py"]
-    }
+class Program:
+    def __init__(self, name, sort=False):
+        self._name = name
+        self._sort = sort
+
+    def get_name(self):
+        return self._name;
+        
+    def get_sort(self):
+        return self._sort;
+
+def get_configs():
+    return {
+        'a3': [Program("rhymes.py")],
+        'a4': [Program("abundance.py"), Program("biodiversity.py")],
+        'a5': [Program("ngrams.py", sort=True), Program("bball.py", sort=True)],
+        'ver': [Program("version.py")]
+        }
 
 #
 # Swap these to get a unified diff
@@ -150,7 +152,9 @@ def get_tests(program, assignment):
 
     return sorted(result)
 
-def run_tests(program, assignment):
+def run_tests(program_spec, assignment):
+    program = program_spec.get_name().split(".")[0]
+
     test_dir = "test-" + assignment
     for testnum in get_tests(program, assignment):
         print("\n{}: Running test {}...".format(program, testnum), end="")
@@ -168,6 +172,9 @@ def run_tests(program, assignment):
         actual_lines = actual_file.readlines()
         expected_file.close()
         actual_file.close()
+        if program_spec.get_sort():
+            expected_lines = sorted(expected_lines)
+            actual_lines = sorted(actual_lines)
         diff = DIFF_TYPE(expected_lines, actual_lines, fromfile=expected_fname, tofile=actual_fname)
         diff_str = ""
         for line in diff:
@@ -186,13 +193,13 @@ def main():
     print(sys.version)
     assignment=re.split(r'[/\\]',sys.argv[0])[-1].split("-")[0]  # todo: switch to os-independent path handling
 
-    if assignment not in CONFIG:
+    configs = get_configs()
+    if assignment not in configs:
         print("Oops! Can't figure out assignment number for tester named '{}'".format(sys.argv[0]))
         sys.exit(1)
         
     ensure_test_dir_current(assignment)
-    for program in CONFIG[assignment]:
-        program = program.split(".")[0]
+    for program in configs[assignment]:
         run_tests(program, assignment)
 
 main()
