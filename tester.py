@@ -63,7 +63,7 @@ def ensure_test_dir_current(assignment):
 
 def test_dir_current(test_dir, assignment_url):
     try:
-        my_version = (test_dir / "version.txt").read_text().strip()
+        my_version = (test_dir / "version.txt").open().read().strip()
     except FileNotFoundError:
         return False
 
@@ -188,7 +188,7 @@ def run_tests(program_spec, assignment):
         
         
 def main():
-    print("tester.py, version 1.0")
+    print("tester.py, version 1.1")
     print("Python version:")
     print(sys.version)
     assignment=re.split(r'[/\\]',sys.argv[0])[-1].split("-")[0]  # todo: switch to os-independent path handling
