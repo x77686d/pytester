@@ -1,7 +1,27 @@
+#
+# Settings that students might want to adjust are below.
+#
+# The list TEST specifies which of this assignment's programs(s) to test.  Don't forget
+# the .py suffix!
+#
+TEST = ["ngrams.py"]
 
+#
+# If STOP_ON_FIRST_DIFF is True the tester stops after the the first difference is encountered.
+#
+STOP_ON_FIRST_DIFF = True
+
+import difflib
+#
+# DIFF_TYPE controls the format of "diffs".  Try swapping the following two assignments with a
+# run that produces differences.
+#
+DIFF_TYPE=difflib.context_diff
+DIFF_TYPE=difflib.unified_diff
+
+####### End of commonly adjusted settings for students #######
 
 from pathlib import Path
-import difflib
 import os
 import re
 import subprocess
@@ -29,10 +49,6 @@ def get_configs():
         'ver': [Program("version.py")]
         }
 
-#
-# Swap these to get a unified diff
-DIFF_TYPE=difflib.unified_diff
-DIFF_TYPE=difflib.context_diff
 
 TESTER_URL_ROOT="http://www2.cs.arizona.edu/~whm/120/"
 
@@ -74,12 +90,8 @@ def test_dir_current(test_dir, assignment_url):
     return my_version == expected_version
 
 def get_remote_file_contents(url):
-    try:
-        contents = urllib.request.urlopen(url).read()
-        return contents
-    except urllib.error.HTTPError as e:
-        print("Oops! HTTPError, url='{}', code='{}', message='{}'".format(e.geturl(),e.getcode(),e.msg))
-        sys.exit(1)
+    contents = urllib.request.urlopen(url).read()
+    return contents
 
 def build_test_directory(test_dir, assignment_url):
     print("Building test directory", end="")
@@ -97,50 +109,35 @@ def build_test_directory(test_dir, assignment_url):
         print(e)
         sys.exit(1)
 
-    try:
-        f = urllib.request.urlopen(assignment_url)
-        s = f.read()
-        #print(s)
-        for m in re.finditer(r'>(\w+)-input-([0-9]+)\.txt<',str(s)):
-            program = m.group(1)
-            testnum = m.group(2)
-            for fname in ["{}-{}-{}.txt".format(program, name, testnum) for name in ["input","expected"]]:
-                #print(fname)
-                copy_test_file(assignment_url, test_dir, fname)
-                print_dot()
-        f.close()
-
-        f = urllib.request.urlopen(assignment_url + "testfiles.txt")
-        for fname in f.readlines():
-            fname = fname.decode().strip()
-            if len(fname) == 0 or fname[0] == "#":
-                continue
+    f = urllib.request.urlopen(assignment_url)
+    s = f.read()
+    #print(s)
+    for m in re.finditer(r'>(\w+)-input-([0-9]+)\.txt<',str(s)):
+        program = m.group(1)
+        testnum = m.group(2)
+        for fname in ["{}-{}-{}.txt".format(program, name, testnum) for name in ["input","expected"]]:
+            #print(fname)
             copy_test_file(assignment_url, test_dir, fname)
             print_dot()
+    f.close()
 
-        copy_test_file(assignment_url, test_dir, "version.txt")
-        print("Done!")
-        
-    except urllib.error.HTTPError as e:
-        print("Oops! HTTPError, url='{}'".format(e.geturl()))
-        print(e)
-        sys.exit(1)
+    f = urllib.request.urlopen(assignment_url + "testfiles.txt")
+    for fname in f.readlines():
+        fname = fname.decode().strip()
+        if len(fname) == 0 or fname[0] == "#":
+            continue
+        copy_test_file(assignment_url, test_dir, fname)
+        print_dot()
 
+    copy_test_file(assignment_url, test_dir, "version.txt")
+    print("Done!")
+    
 def copy_test_file(url, test_dir, fname):
     with urllib.request.urlopen(url + fname) as testurl:
         testfilepath = test_dir / fname
         testfile = testfilepath.open(mode="wb")
         testfile.write(testurl.read())
         testfile.close()
-
-def show_file(fname):
-    print("----- Contents of file '{}' -----".format(fname))
-    try:
-        f = open(fname, "r")
-        print(f.read(), end="")
-        f.close()
-    except Exception as e:
-        print(e)
 
 def get_tests(program, assignment):
     result = []
@@ -185,21 +182,42 @@ def run_tests(program_spec, assignment):
         else:
             print("FAILED")
             print(diff_str)
+            if STOP_ON_FIRST_DIFF:
+                sys.exit(1)
         
         
 def main():
-    print("tester.py, version 1.1")
+    print("CSC 120 Tester, version 1.2")
     print("Python version:")
     print(sys.version)
     assignment=re.split(r'[/\\]',sys.argv[0])[-1].split("-")[0]  # todo: switch to os-independent path handling
 
-    configs = get_configs()
-    if assignment not in configs:
-        print("Oops! Can't figure out assignment number for tester named '{}'".format(sys.argv[0]))
+    try:
+        configs = get_configs()
+        if assignment not in configs:
+            print("Oops! Can't figure out assignment number for tester named '{}'".format(sys.argv[0]))
+            sys.exit(1)
+            
+        ensure_test_dir_current(assignment)
+        for test_name in TEST:
+            found_test = False
+            for program in configs[assignment]:
+                if program.get_name() == test_name:
+                    run_tests(program, assignment)
+                    found_test = True
+            if not found_test:
+                print("Oops! Looks like TEST is incorrect: '{}' is not a program in this assignment."
+                    .format(test_name))
+                sys.exit(1)
+                
+    except urllib.error.HTTPError as e:
+        print("Oops! HTTPError, url='{}'".format(e.geturl()))
+        print(e)
         sys.exit(1)
-        
-    ensure_test_dir_current(assignment)
-    for program in configs[assignment]:
-        run_tests(program, assignment)
+
+    except urllib.error.URLError as e:
+        print(e)
+        print("Are you perhaps off the net?")
+        #print(dir(e),e.args,e.reason,e.strerror,e.with_traceback)
 
 main()
