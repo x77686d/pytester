@@ -5,6 +5,7 @@
 # the .py suffix!
 #
 TEST = ["ngrams.py"]
+#TEST = ["ngrams.py","bball.py"]  # to test both
 
 #
 # If STOP_ON_FIRST_DIFF is True the tester stops after the the first difference is encountered.
@@ -22,13 +23,14 @@ DIFF_TYPE=difflib.unified_diff
 ####### End of commonly adjusted settings for students #######
 
 from pathlib import Path
+import argparse
 import os
+import platform
 import re
+import shutil        
 import subprocess
 import sys
 import urllib.request
-import argparse
-import shutil        
 
 class Program:
     def __init__(self, name, sort=False):
@@ -184,12 +186,15 @@ def run_tests(program_spec, assignment):
             print(diff_str)
             if STOP_ON_FIRST_DIFF:
                 sys.exit(1)
-        
-        
-def main():
+
+def print_header():
     print("CSC 120 Tester, version 1.2")
     print("Python version:")
     print(sys.version)
+    print("os.name: {}, platform: {}".format(os.name, platform.platform()))
+        
+def main():
+    print_header()
     assignment=re.split(r'[/\\]',sys.argv[0])[-1].split("-")[0]  # todo: switch to os-independent path handling
 
     try:
