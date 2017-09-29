@@ -5,7 +5,7 @@
 # the .py suffix!
 #
 TEST = ["ngrams.py"]
-#TEST = ["ngrams.py","bball.py"]  # uncomment to test both
+TEST = ["ngrams.py","bball.py"]  # uncomment to test both
 
 #
 # If STOP_ON_FIRST_DIFF is True the tester stops after the the first difference is encountered.
@@ -22,6 +22,8 @@ DIFF_TYPE=difflib.unified_diff
 
 ####### End of commonly adjusted settings for students #######
 
+VERSION = "1.5"
+
 from pathlib import Path
 import argparse
 import os
@@ -31,6 +33,9 @@ import shutil
 import subprocess
 import sys
 import urllib.request
+
+global html_file
+html_file = None
 
 class Program:
     def __init__(self, name, sort=False):
@@ -152,11 +157,12 @@ def get_tests(program, assignment):
     return sorted(result)
 
 def run_tests(program_spec, assignment):
+    global html_file
+    
     program = program_spec.get_name().split(".")[0]
 
     test_dir = "test-" + assignment
     html_fname = "diff-" + assignment + ".html"
-    html_file = None
     for test_num in get_tests(program, assignment):
         print("\n{}: Running test {}...".format(program, test_num), end="")
         stdin_fname = "{}/{}-input-{}.txt".format(test_dir, program, test_num)
@@ -192,7 +198,7 @@ def run_tests(program_spec, assignment):
                 html_file = open(html_fname, "w")
                 write_html_header(html_file)
 
-            write_diff_header(html_file, test_num, stdin_fname)
+            write_diff_header(html_file, program_spec.get_name(), test_num, stdin_fname)
                         
             htmldiff = difflib.HtmlDiff().make_table(expected_lines, actual_lines, fromdesc=expected_fname, todesc=actual_fname)
             html_file.write(add_file_links(htmldiff, expected_fname, actual_fname))
@@ -201,26 +207,21 @@ def run_tests(program_spec, assignment):
             if STOP_ON_FIRST_DIFF:
                 break
 
-    if html_file:
-        write_html_footer(html_file)
-        html_file.close()
-
-
-def write_diff_header(html_file, test_num, stdin_fname):
+def write_diff_header(html_file, program, test_num, stdin_fname):
     html_file.write("""
-        <h1>Difference on test {0}</h1>
-        <h2>Input: (<code><a href='{1}'>{1}</a></code>)</h2>
+        <h1>Difference on <code>{0}</code> test {1}</h1>
+        <h2>Input: (<code><a href='{2}'>{2}</a></code>)</h2>
         <table class="diff" rules="groups">
         <colgroup></colgroup>
         <tbody>
-        <tr><td>{1}
+        <tr><td>{2}
         <tr><td>1
         </tbody>
         </table>
-        <h2>Diff:</h2>""".format(int(test_num), stdin_fname))
+        <h2>Diff:</h2>""".format(program, int(test_num), stdin_fname))
             
 def print_header():
-    print("CSC 120 Tester, version 1.4")
+    print("CSC 120 Tester, version {}".format(VERSION))
     print("Python version:")
     print(sys.version)
     print("os.name: {}, platform: {}".format(os.name, platform.platform()))
@@ -236,38 +237,6 @@ def show_input(fname):
     except Exception as e:
         print(e)
         
-def main():
-    print_header()
-    assignment=re.split(r'[/\\]',sys.argv[0])[-1].split("-")[0]  # todo: switch to os-independent path handling
-
-    try:
-        configs = get_configs()
-        if assignment not in configs:
-            print("Oops! Can't figure out assignment number for tester named '{}'".format(sys.argv[0]))
-            sys.exit(1)
-            
-        ensure_test_dir_current(assignment)
-        for test_name in TEST:
-            found_test = False
-            for program in configs[assignment]:
-                if program.get_name() == test_name:
-                    run_tests(program, assignment)
-                    found_test = True
-            if not found_test:
-                print("Oops! Looks like TEST is incorrect: '{}' is not a program in this assignment."
-                    .format(test_name))
-                sys.exit(1)
-                
-    except urllib.error.HTTPError as e:
-        print("Oops! HTTPError, url='{}'".format(e.geturl()))
-        print(e)
-        sys.exit(1)
-
-    except urllib.error.URLError as e:
-        print(e)
-        print("Are you perhaps off the net?")
-        #print(dir(e),e.args,e.reason,e.strerror,e.with_traceback)
-
 def add_file_links(htmldiff, fname1, fname2):
     for fname in [fname1, fname2]:
         htmldiff = htmldiff.replace(fname, "<a href='{0}'>{0}</a>".format(fname))
@@ -305,6 +274,42 @@ def write_html_header(f):
 
 def write_html_footer(f):
     f.write('<table class="diff" summary="Legends"> <tr> <th colspan="2"> Legends </th> </tr> <tr> <td> <table border="" summary="Colors"> <tr><th> Colors </th> </tr> <tr><td class="diff_add">&nbsp;Added&nbsp;</td></tr> <tr><td class="diff_chg">Changed</td> </tr> <tr><td class="diff_sub">Deleted</td> </tr> </table></td> <td> <table border="" summary="Links"> <tr><th colspan="2"> Links </th> </tr> <tr><td>(f)irst change</td> </tr> <tr><td>(n)ext change</td> </tr> <tr><td>(t)op</td> </tr> </table></td> </tr> </table></body></html>')
+
+def main():
+    print_header()
+    assignment=re.split(r'[/\\]',sys.argv[0])[-1].split("-")[0]  # todo: switch to os-independent path handling
+
+    try:
+        configs = get_configs()
+        if assignment not in configs:
+            print("Oops! Can't figure out assignment number for tester named '{}'".format(sys.argv[0]))
+            sys.exit(1)
+            
+        ensure_test_dir_current(assignment)
+        for test_name in TEST:
+            found_test = False
+            for program in configs[assignment]:
+                if program.get_name() == test_name:
+                    run_tests(program, assignment)
+                    found_test = True
+            if not found_test:
+                print("Oops! Looks like TEST is incorrect: '{}' is not a program in this assignment."
+                    .format(test_name))
+                sys.exit(1)
+                
+    except urllib.error.HTTPError as e:
+        print("Oops! HTTPError, url='{}'".format(e.geturl()))
+        print(e)
+        sys.exit(1)
+
+    except urllib.error.URLError as e:
+        print(e)
+        print("Are you perhaps off the net?")
+        #print(dir(e),e.args,e.reason,e.strerror,e.with_traceback)
+
+    if html_file:
+        write_html_footer(html_file)
+        html_file.close()
 
 main()
 
