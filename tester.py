@@ -203,7 +203,7 @@ def run_tests(program_spec, assignment):
 
 
 def print_header():
-    print("CSC 120 Tester, version 1.2")
+    print("CSC 120 Tester, version 1.3")
     print("Python version:")
     print(sys.version)
     print("os.name: {}, platform: {}".format(os.name, platform.platform()))
