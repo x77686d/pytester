@@ -157,16 +157,16 @@ def run_tests(program_spec, assignment):
     test_dir = "test-" + assignment
     html_fname = "diff-" + assignment + ".html"
     html_file = None
-    for testnum in get_tests(program, assignment):
-        print("\n{}: Running test {}...".format(program, testnum), end="")
-        stdin_fname = "{}/{}-input-{}.txt".format(test_dir, program, testnum)
-        actual_fname = "{}/{}-actual-{}.txt".format(test_dir, program, testnum)
+    for test_num in get_tests(program, assignment):
+        print("\n{}: Running test {}...".format(program, test_num), end="")
+        stdin_fname = "{}/{}-input-{}.txt".format(test_dir, program, test_num)
+        actual_fname = "{}/{}-actual-{}.txt".format(test_dir, program, test_num)
         stdin = open(stdin_fname,"r")
         actual_file = open(actual_fname,"w")
         rc = subprocess.call([sys.executable, program + ".py"], stdin=stdin, stdout=actual_file, stderr=subprocess.STDOUT)
         stdin.close()
         actual_file.close()
-        expected_fname = "{}/{}-expected-{}.txt".format(test_dir, program, testnum)
+        expected_fname = "{}/{}-expected-{}.txt".format(test_dir, program, test_num)
         expected_file = open(expected_fname, "r")
         actual_file = open(actual_fname,"r")
         expected_lines = expected_file.readlines()
@@ -185,15 +185,19 @@ def run_tests(program_spec, assignment):
             print("PASSED")
         else:
             print("FAILED")
+
+            show_input(stdin_fname)
             print(diff_str)
             if not html_file:
                 html_file = open(html_fname, "w")
                 write_html_header(html_file)
-                
+
+            write_diff_header(html_file, test_num, stdin_fname)
+                        
             htmldiff = difflib.HtmlDiff().make_table(expected_lines, actual_lines, fromdesc=expected_fname, todesc=actual_fname)
             html_file.write(add_file_links(htmldiff, expected_fname, actual_fname))
             html_file.write("<br><br>")
-            
+                
             if STOP_ON_FIRST_DIFF:
                 break
 
@@ -202,11 +206,35 @@ def run_tests(program_spec, assignment):
         html_file.close()
 
 
+def write_diff_header(html_file, test_num, stdin_fname):
+    html_file.write("""
+        <h1>Difference on test {0}</h1>
+        <h2>Input: (<code><a href='{1}'>{1}</a></code>)</h2>
+        <table class="diff" rules="groups">
+        <colgroup></colgroup>
+        <tbody>
+        <tr><td>{1}
+        <tr><td>1
+        </tbody>
+        </table>
+        <h2>Diff:</h2>""".format(int(test_num), stdin_fname))
+            
 def print_header():
-    print("CSC 120 Tester, version 1.3")
+    print("CSC 120 Tester, version 1.4")
     print("Python version:")
     print(sys.version)
     print("os.name: {}, platform: {}".format(os.name, platform.platform()))
+
+def show_input(fname):
+    print("Input: (in {})".format(fname))
+    try:
+        f = open(fname)
+        for line in f:
+            print("   ", line.rstrip())
+        print()
+        f.close()
+    except Exception as e:
+        print(e)
         
 def main():
     print_header()
@@ -247,7 +275,33 @@ def add_file_links(htmldiff, fname1, fname2):
     return htmldiff
 
 def write_html_header(f):
-    f.write('<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html><head> <meta http-equiv="Content-Type" content="text/html; charset=utf-8" /> <title></title> <style type="text/css"> table.diff {font-family:Courier; border:medium;} .diff_header {background-color:#e0e0e0} td.diff_header {text-align:right} .diff_next {background-color:#c0c0c0} .diff_add {background-color:#aaffaa} .diff_chg {background-color:#ffff77} .diff_sub {background-color:#ffaaaa} </style></head><body>')
+    f.write("""
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html>
+
+<head>
+    <meta http-equiv="Content-Type"
+          content="text/html; charset=utf-8" />
+    <title></title>
+    <style type="text/css">
+        table.diff {font-family:Courier; border:medium; margin-left: 3em}
+        .diff_header {background-color:#e0e0e0}
+        td.diff_header {text-align:right}
+        .diff_next {background-color:#c0c0c0}
+        .diff_add {background-color:#aaffaa}
+        .diff_chg {background-color:#ffff77}
+        .diff_sub {background-color:#ffaaaa}
+        h1 { font-size: 1.2em; text-decoration: underline }
+        h2 { font-size: 1.1em; margin-left: 1em }
+        pre { margin-left: 3em }
+    </style>
+</head>
+
+<body>
+    """)
+
 
 def write_html_footer(f):
     f.write('<table class="diff" summary="Legends"> <tr> <th colspan="2"> Legends </th> </tr> <tr> <td> <table border="" summary="Colors"> <tr><th> Colors </th> </tr> <tr><td class="diff_add">&nbsp;Added&nbsp;</td></tr> <tr><td class="diff_chg">Changed</td> </tr> <tr><td class="diff_sub">Deleted</td> </tr> </table></td> <td> <table border="" summary="Links"> <tr><th colspan="2"> Links </th> </tr> <tr><td>(f)irst change</td> </tr> <tr><td>(n)ext change</td> </tr> <tr><td>(t)op</td> </tr> </table></td> </tr> </table></body></html>')
