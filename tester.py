@@ -5,7 +5,7 @@
 # the .py suffix!
 #
 TEST = ["ngrams.py"]
-TEST = ["ngrams.py","bball.py"]  # uncomment to test both
+#TEST = ["ngrams.py","bball.py"]  # uncomment to test both
 
 #
 # If STOP_ON_FIRST_DIFF is True the tester stops after the the first difference is encountered.
@@ -22,7 +22,7 @@ DIFF_TYPE=difflib.unified_diff
 
 ####### End of commonly adjusted settings for students #######
 
-VERSION = "1.5"
+VERSION = "1.6"
 
 from pathlib import Path
 import argparse
@@ -213,12 +213,16 @@ def write_diff_header(html_file, program, test_num, stdin_fname):
         <h2>Input: (<code><a href='{2}'>{2}</a></code>)</h2>
         <table class="diff" rules="groups">
         <colgroup></colgroup>
-        <tbody>
-        <tr><td>{2}
-        <tr><td>1
+        <tbody>""".format(program, int(test_num), stdin_fname))
+
+    for line in open(stdin_fname):
+        html_file.write("<tr><td>" + line + "\n")
+        
+    html_file.write(""" 
         </tbody>
         </table>
-        <h2>Diff:</h2>""".format(program, int(test_num), stdin_fname))
+        <h2>Diff:</h2>""")
+        
             
 def print_header():
     print("CSC 120 Tester, version {}".format(VERSION))
