@@ -5,12 +5,12 @@
 # the .py suffix!
 #
 TEST = ["ngrams.py"]
-#TEST = ["ngrams.py","bball.py"]  # to test both
+#TEST = ["ngrams.py","bball.py"]  # uncomment to test both
 
 #
 # If STOP_ON_FIRST_DIFF is True the tester stops after the the first difference is encountered.
 #
-STOP_ON_FIRST_DIFF = True
+STOP_ON_FIRST_DIFF = False
 
 import difflib
 #
@@ -155,6 +155,8 @@ def run_tests(program_spec, assignment):
     program = program_spec.get_name().split(".")[0]
 
     test_dir = "test-" + assignment
+    html_fname = "diff-" + assignment + ".html"
+    html_file = None
     for testnum in get_tests(program, assignment):
         print("\n{}: Running test {}...".format(program, testnum), end="")
         stdin_fname = "{}/{}-input-{}.txt".format(test_dir, program, testnum)
@@ -184,8 +186,21 @@ def run_tests(program_spec, assignment):
         else:
             print("FAILED")
             print(diff_str)
+            if not html_file:
+                html_file = open(html_fname, "w")
+                write_html_header(html_file)
+                
+            htmldiff = difflib.HtmlDiff().make_table(expected_lines, actual_lines, fromdesc=expected_fname, todesc=actual_fname)
+            html_file.write(add_file_links(htmldiff, expected_fname, actual_fname))
+            html_file.write("<br><br>")
+            
             if STOP_ON_FIRST_DIFF:
-                sys.exit(1)
+                break
+
+    if html_file:
+        write_html_footer(html_file)
+        html_file.close()
+
 
 def print_header():
     print("CSC 120 Tester, version 1.2")
@@ -225,4 +240,25 @@ def main():
         print("Are you perhaps off the net?")
         #print(dir(e),e.args,e.reason,e.strerror,e.with_traceback)
 
+def add_file_links(htmldiff, fname1, fname2):
+    for fname in [fname1, fname2]:
+        htmldiff = htmldiff.replace(fname, "<a href='{0}'>{0}</a>".format(fname))
+
+    return htmldiff
+
+def write_html_header(f):
+    f.write('<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html><head> <meta http-equiv="Content-Type" content="text/html; charset=utf-8" /> <title></title> <style type="text/css"> table.diff {font-family:Courier; border:medium;} .diff_header {background-color:#e0e0e0} td.diff_header {text-align:right} .diff_next {background-color:#c0c0c0} .diff_add {background-color:#aaffaa} .diff_chg {background-color:#ffff77} .diff_sub {background-color:#ffaaaa} </style></head><body>')
+
+def write_html_footer(f):
+    f.write('<table class="diff" summary="Legends"> <tr> <th colspan="2"> Legends </th> </tr> <tr> <td> <table border="" summary="Colors"> <tr><th> Colors </th> </tr> <tr><td class="diff_add">&nbsp;Added&nbsp;</td></tr> <tr><td class="diff_chg">Changed</td> </tr> <tr><td class="diff_sub">Deleted</td> </tr> </table></td> <td> <table border="" summary="Links"> <tr><th colspan="2"> Links </th> </tr> <tr><td>(f)irst change</td> </tr> <tr><td>(n)ext change</td> </tr> <tr><td>(t)op</td> </tr> </table></td> </tr> </table></body></html>')
+
 main()
+
+"""
+Discuss:
+    aN naming convention
+        aN-tester.py and test-aN directory
+    Understanding diffs
+    Show test input when there's a diff
+
+"""
