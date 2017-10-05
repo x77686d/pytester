@@ -22,7 +22,7 @@ DIFF_TYPE=difflib.unified_diff
 
 ####### End of commonly adjusted settings for students #######
 
-VERSION = "1.6"
+VERSION = "1.7"
 
 from pathlib import Path
 import argparse
@@ -158,21 +158,26 @@ def get_tests(program, assignment):
 
 def run_tests(program_spec, assignment):
     global html_file
-    
-    program = program_spec.get_name().split(".")[0]
+
+    program_fname = program_spec.get_name()
+    program_basename = program_fname.split(".")[0]
+
+    if not Path(program_fname).is_file():
+        print("Oops! I can't find the file '{}'.  Did you use a different name?".format(program_fname))
+        sys.exit(1)
 
     test_dir = "test-" + assignment
     html_fname = "diff-" + assignment + ".html"
-    for test_num in get_tests(program, assignment):
-        print("\n{}: Running test {}...".format(program, test_num), end="")
-        stdin_fname = "{}/{}-input-{}.txt".format(test_dir, program, test_num)
-        actual_fname = "{}/{}-actual-{}.txt".format(test_dir, program, test_num)
+    for test_num in get_tests(program_basename, assignment):
+        print("\n{}: Running test {}...".format(program_basename, test_num), end="")
+        stdin_fname = "{}/{}-input-{}.txt".format(test_dir, program_basename, test_num)
+        actual_fname = "{}/{}-actual-{}.txt".format(test_dir, program_basename, test_num)
         stdin = open(stdin_fname,"r")
         actual_file = open(actual_fname,"w")
-        rc = subprocess.call([sys.executable, program + ".py"], stdin=stdin, stdout=actual_file, stderr=subprocess.STDOUT)
+        rc = subprocess.call([sys.executable, program_fname], stdin=stdin, stdout=actual_file, stderr=subprocess.STDOUT)
         stdin.close()
         actual_file.close()
-        expected_fname = "{}/{}-expected-{}.txt".format(test_dir, program, test_num)
+        expected_fname = "{}/{}-expected-{}.txt".format(test_dir, program_basename, test_num)
         expected_file = open(expected_fname, "r")
         actual_file = open(actual_fname,"r")
         expected_lines = expected_file.readlines()
@@ -198,7 +203,7 @@ def run_tests(program_spec, assignment):
                 html_file = open(html_fname, "w")
                 write_html_header(html_file)
 
-            write_diff_header(html_file, program_spec.get_name(), test_num, stdin_fname)
+            write_diff_header(html_file, program_fname, test_num, stdin_fname)
                         
             htmldiff = difflib.HtmlDiff().make_table(expected_lines, actual_lines, fromdesc=expected_fname, todesc=actual_fname)
             html_file.write(add_file_links(htmldiff, expected_fname, actual_fname))
@@ -318,10 +323,15 @@ def main():
 main()
 
 """
+Fix:
+    At minimum, write "No differences" to diff-a5.html
+    Have a way to link to input files? (could key on string like "test-aN/.txt")
+    
 Discuss:
     aN naming convention
         aN-tester.py and test-aN directory
     Understanding diffs
     Show test input when there's a diff
+    
 
 """
