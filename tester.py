@@ -22,7 +22,7 @@ DIFF_TYPE=difflib.unified_diff
 
 ####### End of commonly adjusted settings for students #######
 
-VERSION = "1.7"
+VERSION = "1.8"
 
 from pathlib import Path
 import argparse
@@ -59,7 +59,8 @@ def get_configs():
 
 class DiffFile:
     def __init__(self, assignment):
-        self._file = open("diff-" + assignment + ".html", "w")
+        self._assignment = assignment
+        self._file = open("diff.html", "w")
         self._write_file_header()
         self._had_a_diff = False
 
@@ -73,6 +74,9 @@ class DiffFile:
             <tbody>""".format(program_fname, int(test_num), stdin_fname))
     
         for line in open(stdin_fname):
+            line = line.rstrip()
+            if re.match("test-" + self._assignment + r"/.*$", line) and Path(line).is_file():
+                line = "<a href={0}>{0}</a>".format(line)
             self._file.write("<tr><td>" + line + "\n")
             
         self._file.write(""" 
@@ -181,7 +185,7 @@ def get_remote_file_contents(url):
     return contents
 
 def build_test_directory(test_dir, assignment_url):
-    print("Building test directory", end="")
+    print("Building '{}' directory".format(test_dir), end="")
     sys.stdout.flush()
 
     if test_dir.is_dir():
@@ -345,7 +349,6 @@ main()
 
 """
 Fix:
-    At minimum, write "No differences" to diff-a5.html
     Have a way to link to input files? (could key on string like "test-aN/.txt")
     
 Discuss:
