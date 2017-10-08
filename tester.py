@@ -4,8 +4,8 @@
 # The list TEST specifies which of this assignment's programs(s) to test.  Don't forget
 # the .py suffix!
 #
-TEST = ["ngrams.py"]
-TEST = ["ngrams.py","bball.py"]  # uncomment to test both
+TEST = ["rhymes-oo.py"]
+#TEST = ["rhymes-oo.py", "battleship.py"] # uncomment to test both
 
 #
 # If STOP_ON_FIRST_DIFF is True the tester stops after the the first difference is encountered.
@@ -22,7 +22,7 @@ DIFF_TYPE=difflib.unified_diff
 
 ####### End of commonly adjusted settings for students #######
 
-VERSION = "1.8"
+VERSION = "1.9"
 
 from pathlib import Path
 import argparse
@@ -38,22 +38,26 @@ class Program:
     """
     Instances of this class represent a program that is to be tested
     """
-    def __init__(self, name, sort=False):
+    def __init__(self, name, post_process=None):
         self._name = name
-        self._sort = sort
+        if post_process:
+            self._post_process = post_process.split(",")
+        else:
+            self._post_process = []
 
     def get_name(self):
-        return self._name;
+        return self._name
         
-    def get_sort(self):
-        """Returns True iff output is to be sorted before diffing"""
-        return self._sort;
+    def get_post_process(self):
+        """Return list of output post-processing operations, in the user-specified order"""
+        return self._post_process
 
 def get_configs():
     return {
         'a3': [Program("rhymes.py")],
         'a4': [Program("abundance.py"), Program("biodiversity.py")],
-        'a5': [Program("ngrams.py", sort=True), Program("bball.py", sort=True)],
+        'a5': [Program("ngrams.py", post_process="sort"), Program("bball.py", post_process="sort")],
+        'a6': [Program("battleship.py"), Program("rhymes-oo.py", post_process="sort,uniq")],
         'ver': [Program("version.py")]
         }
 
@@ -141,7 +145,7 @@ class DiffFile:
         self._file.close()
     
 
-TESTER_URL_ROOT="http://www2.cs.arizona.edu/~whm/120/"
+TESTER_URL_ROOT="http://www2.cs.arizona.edu/classes/cs120/fall17/ASSIGNMENTS/"
 
 def print_dot():
     print(".", end="")
@@ -156,7 +160,8 @@ def ensure_test_dir_current(assignment):
     """
 
     test_dir = Path("test-" + assignment)
-    assignment_url = TESTER_URL_ROOT + assignment + "/"
+    assignment_url = TESTER_URL_ROOT + "assg{:02d}".format(int(assignment[1:])) + "/tester/"
+    #print(assignment_url)
     
     if test_dir.exists() and not test_dir.is_dir():
         print("""Oops!  The tester needs to create a directory named '{0}' but you've got a file (or something else) named '{0}'.  Remove it or rename it and run me again.""".format(test_dir))
@@ -203,7 +208,7 @@ def build_test_directory(test_dir, assignment_url):
     f = urllib.request.urlopen(assignment_url)
     s = f.read()
     #print(s)
-    for m in re.finditer(r'>(\w+)-input-([0-9]+)\.txt<',str(s)):
+    for m in re.finditer(r'>([-\w]+)-input-([0-9]+)\.txt<',str(s)):
         program = m.group(1)
         testnum = m.group(2)
         for fname in ["{}-{}-{}.txt".format(program, name, testnum) for name in ["input","expected"]]:
@@ -244,6 +249,8 @@ def run_tests(program_spec, assignment, diff_file):
     program_fname = program_spec.get_name()
     program_basename = program_fname.split(".")[0]
 
+    #print("fname, basename", program_fname, program_basename)
+
     if not Path(program_fname).is_file():
         print("Oops! I can't find the file '{}'.  Did you use the right name for your solution?".format(program_fname))
         sys.exit(1)
@@ -268,10 +275,9 @@ def run_tests(program_spec, assignment, diff_file):
         
         expected_file.close()
         actual_file.close()
-        
-        if program_spec.get_sort():
-            expected_lines = sorted(expected_lines)
-            actual_lines = sorted(actual_lines)
+
+        expected_lines = post_process(expected_lines, program_spec.get_post_process())
+        actual_lines = post_process(actual_lines, program_spec.get_post_process())
             
         diff = DIFF_TYPE(expected_lines, actual_lines, fromfile=expected_fname, tofile=actual_fname)
         diff_str = ""
@@ -291,6 +297,33 @@ def run_tests(program_spec, assignment, diff_file):
                 
             if STOP_ON_FIRST_DIFF:
                 break
+
+def post_process(lines, operations):
+    for op in operations:
+        if op == "sort":
+            lines = sorted(lines)
+        elif op == "uniq":
+            lines = uniq(lines)
+        elif op == "upper":
+            lines = list(map(str.upper, lines))
+        elif op == "lower":
+            lines = list(map(str.lower, lines))
+        else:
+            print("\nOops! Tester configuration error: no such operation as '{}'".format(op))
+            print("Tell Dr. O'Bagy about this!")
+            sys.exit()
+
+    return lines
+
+def uniq(L):
+    result = []
+    prev = None
+    for e in L:
+        if e != prev:
+            result.append(e)
+            prev = e
+
+    return result
             
 def print_header():
     print("CSC 120 Tester, version {}".format(VERSION))
