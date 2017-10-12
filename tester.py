@@ -5,7 +5,7 @@
 # the .py suffix!
 #
 TEST = ["rhymes-oo.py"]
-#TEST = ["rhymes-oo.py", "battleship.py"] # uncomment to test both
+TEST = ["rhymes-oo.py", "battleship.py"] # uncomment to test both
 
 #
 # If STOP_ON_FIRST_DIFF is True the tester stops after the the first difference is encountered.
@@ -146,6 +146,8 @@ class DiffFile:
     
 
 TESTER_URL_ROOT="http://www2.cs.arizona.edu/classes/cs120/fall17/ASSIGNMENTS/"
+TESTER_URL_ROOT="http://www2.cs.arizona.edu/~whm/120/ASSIGNMENTS/"
+
 
 def print_dot():
     print(".", end="")
@@ -382,8 +384,15 @@ main()
 
 """
 Fix:
-    Have a way to link to input files? (could key on string like "test-aN/.txt")
-    
+    Have links and such for no differences cases
+
+    Add an "Update in Progress" message via version.txt?
+        Just swap in a new directory?
+            Need a way to test with the new directory
+                --exp -- experimental directory
+
+    Warn if name is not of the form "aN-tester".
+
 Discuss:
     aN naming convention
         aN-tester.py and test-aN directory
