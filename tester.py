@@ -146,7 +146,7 @@ class DiffFile:
     
 
 TESTER_URL_ROOT="http://www2.cs.arizona.edu/classes/cs120/fall17/ASSIGNMENTS/"
-TESTER_URL_ROOT="http://www2.cs.arizona.edu/~whm/120/ASSIGNMENTS/"
+#TESTER_URL_ROOT="http://www2.cs.arizona.edu/~whm/120/ASSIGNMENTS/"
 
 
 def print_dot():
