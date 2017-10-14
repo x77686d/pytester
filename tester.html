@@ -1,0 +1,41 @@
+<!doctype html>
+<head>
+    <style>
+	    h1 { font-size: 1.2em; border-bottom: dotted thin }
+	    h2 { font-size: 1.1em }
+		pre { margin-left: 3em;  }
+		table { border: solid 1px; margin-left: 3em  }
+		th, td { padding: 0px 1em 0px 1em; border: dotted thin }
+		a { font-family: monospace }
+		.a_serif { font-family: serif }
+        .filelink { font-family: monospace }
+	</style>
+</head>
+<html>
+<h1>Introduction
+<p>
+Source code and this document is hosted at <a href=https://github.com/x77686d/pytester>https://github.com/x77686d/pytester</a>
+
+<h1>Tester source directory set-up for assignment</h1>
+<p>
+<ul>
+<li>Make <code>aN-tester.py</code> symlink for new assignment and turn old symlink into a copy
+<li>Copy and update <code>push-latest</code>
+<li>Add program(s) to <code>TEST</code> and <code>get_configs()</code> in <code>aN-tester.py</code>
+</ul>
+<h1>Directory set-up on lectura</h1>
+<p>
+For <code>a7/dates.py</code>, did this:
+<pre>
+for i in $(seq 4)
+do
+    echo "test-a7/in0$i.txt" > dates-input-0$i.txt
+	touch dates-expected-0$i.txt
+done
+</pre>
+
+After running locally did this in <code>test-a7</code>:
+<pre>
+rename -f s/actual/expected/ dates-actual-0*
+scp dates-expected-0* lec:www120a/assgn07/tester
+</pre>
