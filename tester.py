@@ -4,8 +4,7 @@
 # The list TEST specifies which of this assignment's programs(s) to test.  Don't forget
 # the .py suffix!
 #
-TEST = ["rhymes-oo.py"]
-TEST = ["rhymes-oo.py", "battleship.py"] # uncomment to test both
+TEST = ["dates.py"]
 
 #
 # If STOP_ON_FIRST_DIFF is True the tester stops after the the first difference is encountered.
@@ -22,7 +21,7 @@ DIFF_TYPE=difflib.unified_diff
 
 ####### End of commonly adjusted settings for students #######
 
-VERSION = "1.9"
+VERSION = "1.10"
 
 from pathlib import Path
 import argparse
@@ -58,6 +57,7 @@ def get_configs():
         'a4': [Program("abundance.py"), Program("biodiversity.py")],
         'a5': [Program("ngrams.py", post_process="sort"), Program("bball.py", post_process="sort")],
         'a6': [Program("battleship.py"), Program("rhymes-oo.py", post_process="sort,uniq")],
+        'a7': [Program("dates.py")],
         'ver': [Program("version.py")]
         }
 
@@ -392,6 +392,8 @@ Fix:
                 --exp -- experimental directory
 
     Warn if name is not of the form "aN-tester".
+
+    Look for empty sys.argv[0] and ask if Wing 101    
 
 Discuss:
     aN naming convention
