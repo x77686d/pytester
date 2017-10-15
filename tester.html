@@ -14,9 +14,9 @@
 <html>
 <h1>Introduction
 <p>
-Source code and this document is hosted at <a href=https://github.com/x77686d/pytester>https://github.com/x77686d/pytester</a>
+Source code, this document, and more are at <a href=https://github.com/x77686d/pytester>https://github.com/x77686d/pytester</a>
 
-<h1>Tester source directory set-up for assignment</h1>
+<h1>Tester source directory set-up for a new assignment</h1>
 <p>
 <ul>
 <li>Make <code>aN-tester.py</code> symlink for new assignment and turn old symlink into a copy
@@ -30,11 +30,11 @@ For <code>a7/dates.py</code>, did this:
 for i in $(seq 4)
 do
     echo "test-a7/in0$i.txt" > dates-input-0$i.txt
-	touch dates-expected-0$i.txt
+    touch dates-expected-0$i.txt
 done
 </pre>
 
-After running locally did this in <code>test-a7</code>:
+After running locally, did this in <code>test-a7</code>:
 <pre>
 rename -f s/actual/expected/ dates-actual-0*
 scp dates-expected-0* lec:www120a/assgn07/tester
