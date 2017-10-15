@@ -393,7 +393,10 @@ Fix:
 
     Warn if name is not of the form "aN-tester".
 
-    Look for empty sys.argv[0] and ask if Wing 101    
+    Look for empty sys.argv[0] and ask if Wing 101
+
+    Print warning if running in testerx mode
+        Add an option for that mode
 
 Discuss:
     aN naming convention
