@@ -398,6 +398,10 @@ Fix:
     Print warning if running in testerx mode
         Add an option for that mode
 
+    Add option to override source file: -s dates.py=dates-whm.py
+
+    Test for git experimentation.
+
 Discuss:
     aN naming convention
         aN-tester.py and test-aN directory
