@@ -387,7 +387,7 @@ Fix:
     Have links and such for no differences cases
 
     Add an "Update in Progress" message via version.txt?
-        Just swap in a new directory?
+        Just swap in a new directory?  
             Need a way to test with the new directory
                 --exp -- experimental directory
 
