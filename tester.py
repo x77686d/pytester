@@ -69,6 +69,7 @@ class DiffFile:
         self._had_a_diff = False
 
     def add_diff(self, program_fname, test_num, expected_fname, expected_lines, actual_fname, actual_lines, stdin_fname):
+        LIMIT_INPUT_FILE_TEXT = 5000
         self._had_a_diff = True
         self._file.write("""
             <h1>Difference on <code>{0}</code> test {1}</h1>
@@ -76,22 +77,40 @@ class DiffFile:
             <table class="diff" rules="groups">
             <colgroup></colgroup>
             <tbody>""".format(program_fname, int(test_num), stdin_fname))
-    
+
+        test_files = []
+        test_file_headers = []
         for line in open(stdin_fname):
             line = line.rstrip()
             if re.match("test-" + self._assignment + r"/.*$", line) and Path(line).is_file():
+                test_files.append(line.strip("\n"))
                 line = "<a href={0}>{0}</a>".format(line)
+                test_file_headers.append(line)
             self._file.write("<tr><td>" + line + "\n")
-            
+
         self._file.write(""" 
             </tbody>
             </table>
+            """)
+
+        for i in range(len(test_files)):
+            open_file = open(test_files[i])
+            file_text = open_file.read()
+            if (len(file_text) > LIMIT_INPUT_FILE_TEXT): 
+                file_text = file_text[:LIMIT_INPUT_FILE_TEXT] + "..." 
+            self._file.write(""" 
+            <div style="display: inline-block; position: relative; margin-top: 20px; margin-left: 20px;"><div style="background-color: white; border:3px solid black; position: relative; height: 30px; width:100%; top:2px; z-index:9; text-align: center; left: 50%; transform: translate(-50%, 0);"><span style="position: relative; top: 5px; font-family: Courier; font-weight: 600;">{0}</span></div>
+            <textarea spellcheck="false" autocapitalize="off" autocorrect="off" autocomplete="off" style="overflow: scroll; background-color: #e0e0e0; position: relative; white-space: pre; left: 50%; transform: translate(-50%, 0); width:93%; height: 200px; box-shadow: inset 0px 2px 5px 5px #888888; z-index:8; top:-20px; outline: none; font-family: Courier; border: none; resize: none; padding: 3%" readonly>{1}</textarea></div>
+            """.format(test_file_headers[i], "\n\n\n" + file_text))
+            open_file.close()
+
+        self._file.write("""
             <h2>Diff:</h2>""")
 
         htmldiff = difflib.HtmlDiff().make_table(expected_lines, actual_lines, fromdesc=expected_fname, todesc=actual_fname)
-        
+
         self._file.write(self._add_file_links(htmldiff, expected_fname, actual_fname))
-        
+
         self._file.write("<br><br>")
         
     def close(self):
