@@ -21,7 +21,7 @@ DIFF_TYPE=difflib.unified_diff
 
 ####### End of commonly adjusted settings for students #######
 
-VERSION = "1.10"
+VERSION = "1.11"
 
 from pathlib import Path
 import argparse
