@@ -99,9 +99,9 @@ class DiffFile:
             if (len(file_text) > LIMIT_INPUT_FILE_TEXT): 
                 file_text = file_text[:LIMIT_INPUT_FILE_TEXT] + "..." 
             self._file.write(""" 
-            <div style="display: inline-block; position: relative; margin-top: 20px; margin-left: 20px;"><div style="background-color: white; border:3px solid black; position: relative; height: 30px; width:100%; top:2px; z-index:9; text-align: center; left: 50%; transform: translate(-50%, 0);"><span style="position: relative; top: 5px; font-family: Courier; font-weight: 600;">{0}</span></div>
-            <textarea spellcheck="false" autocapitalize="off" autocorrect="off" autocomplete="off" style="overflow: scroll; background-color: #e0e0e0; position: relative; white-space: pre; left: 50%; transform: translate(-50%, 0); width:93%; height: 200px; box-shadow: inset 0px 2px 5px 5px #888888; z-index:8; top:-20px; outline: none; font-family: Courier; border: none; resize: none; padding: 3%" readonly>{1}</textarea></div>
-            """.format(test_file_headers[i], "\n\n\n" + file_text))
+            <div style="display: inline-block; position: relative; margin-top: 20px; margin-left: 5%; width: {0}%;"><div style="background-color: white; border:3px solid black; position: relative; height: 30px; width:100%; top:2px; z-index:9; text-align: center; left: 50%; transform: translate(-50%, 0); overflow: hidden;"><span style="position: relative; top: 5px; font-family: Courier; font-weight: 600;">{1}</span></div>
+            <textarea spellcheck="false" autocapitalize="off" autocorrect="off" autocomplete="off" style="overflow: auto; background-color: #e0e0e0; position: relative; white-space: pre; left: 50%; transform: translate(-50%, 0); width:97%; height: 200px; box-shadow: inset 0px 2px 5px 5px #888888; z-index:8; top:-20px; outline: none; font-family: Courier; border: none; resize: none; padding-left: 1%; box-sizing: border-box; -webkit-box-sizing: border-box;" readonly>{2}</textarea></div>
+            """.format(((95 - (5 * len(test_files))) / len(test_files)), test_file_headers[i], "\n\n\n" + file_text))
             open_file.close()
 
         self._file.write("""
