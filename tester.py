@@ -4,7 +4,7 @@
 # The list TEST specifies which of this assignment's programs(s) to test.  Don't forget
 # the .py suffix!
 #
-TEST = ["fake-news.pyx"]
+TEST = ["fake-news.py"]
 
 #
 # If STOP_ON_FIRST_DIFF is True the tester stops after the the first difference is encountered.
@@ -21,7 +21,7 @@ DIFF_TYPE=difflib.unified_diff
 
 ####### End of commonly adjusted settings for students #######
 
-VERSION = "1.12"
+VERSION = "1.14"
 
 from pathlib import Path
 import argparse
@@ -369,6 +369,7 @@ def print_header():
     print("Python version:")
     print(sys.version)
     print("os.name: {}, platform: {}".format(os.name, platform.platform()))
+    print()
 
 def show_input(fname):
     print("Input: (in {})".format(fname))
@@ -382,10 +383,16 @@ def show_input(fname):
         print(e)
 
 def get_assignment(argv):
-    if len(argv) == 0 or "-" not in argv[0]:
-        return get_assignment_based_on_tests()
+    aN_pattern = r'(a\d+)-.*'
+    match = re.match(aN_pattern, argv[0])
+    if len(argv) == 0 or not match:
+        print("Note: Determining assignment based on first program in TEST list...", end="")
+        assignment = get_assignment_based_on_tests()
+        print("looks like '{}'".format(assignment))
     else:
-        return re.split(r'[/\\]',argv[0])[-1].split("-")[0]  # todo: switch to os-independent path handling
+        assignment = match.groups(0)[0]
+
+    return assignment
 
 def get_assignment_based_on_tests():
     for aname, programs in get_configs().items():
