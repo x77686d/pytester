@@ -159,6 +159,7 @@ class DiffFile:
             h1 { font-size: 1.2em; text-decoration: underline }
             h2 { font-size: 1.1em; margin-left: 1em }
             pre { margin-left: 3em }
+            .notice { color: red; font-size: 2em; text-decoration underline; font-weight: bold }
         </style>
     </head>
     
@@ -172,6 +173,9 @@ class DiffFile:
         else:
             self._file.write('<h1>No differences!</h1>')
         self._file.write('</body></html>')
+
+    def note_interrupted(self):
+        self._file.write("<p class=notice>NOTE: Tester execution interrupted; not all tests were completed.")
 
     def finish(self):
         self._write_file_footer()
@@ -413,14 +417,15 @@ def main():
 
     except KeyboardInterrupt:
         print("Interrupted!")
+        diff_file.note_interrupted()
+
+    finally:
         diff_file.finish()
 
 main()
 
 """
 Fix:
-    Catch ^C and write diff file (done?)
-
     Base assignment number on contents of TEST
 
     Have links and such for no differences cases
@@ -429,10 +434,6 @@ Fix:
         Just swap in a new directory?  (why the spaces? -- whm)
             Need a way to test with the new directory
                 --exp -- experimental directory
-
-    Warn if name is not of the form "aN-tester".
-
-    Look for empty sys.argv[0] and ask if Wing 101
 
     Print warning if running in testerx mode
         Add an option for that mode
