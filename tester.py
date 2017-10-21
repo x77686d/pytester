@@ -97,8 +97,21 @@ class DiffFile:
         for i in range(len(test_files)):
             open_file = open(test_files[i])
             file_text = open_file.read()
-            if (len(file_text) > LIMIT_INPUT_FILE_TEXT): 
-                file_text = file_text[:LIMIT_INPUT_FILE_TEXT] + "..." 
+            file_len = len(file_text)
+            if (file_len > LIMIT_INPUT_FILE_TEXT):
+                #
+                # truncate at the end of a whole line, if possible
+                #
+                last_newline = file_text.rfind("\n", 0, LIMIT_INPUT_FILE_TEXT)
+                if last_newline >= 0:
+                    file_text = file_text[:last_newline+1]
+                    discarded = file_len - last_newline - 1
+                else:
+                    file_text = file_text[:LIMIT_INPUT_FILE_TEXT]
+                    discarded = file_len - LIMIT_INPUT_FILE_TEXT
+                    
+                file_text += "[...{} additional characters not shown...]".format(discarded)
+                
             self._file.write(""" 
             <div style="display: inline-block; position: relative; margin-top: 20px; margin-left: 5%; width: {0}%;"><div style="background-color: white; border:3px solid black; position: relative; height: 30px; width:100%; top:2px; z-index:9; text-align: center; left: 50%; transform: translate(-50%, 0); overflow: hidden;"><span style="position: relative; top: 5px; font-family: Courier; font-weight: 600;">{1}</span></div>
             <textarea spellcheck="false" autocapitalize="off" autocorrect="off" autocomplete="off" style="overflow: auto; background-color: #e0e0e0; position: relative; white-space: pre; left: 50%; transform: translate(-50%, 0); width:97%; height: 200px; box-shadow: inset 0px 2px 5px 5px #888888; z-index:8; top:-20px; outline: none; font-family: Courier; border: none; resize: none; padding-left: 1%; box-sizing: border-box; -webkit-box-sizing: border-box;" readonly>{2}</textarea></div>
@@ -407,9 +420,6 @@ main()
 """
 Fix:
     Catch ^C and write diff file (done?)
-
-    Work on "..." in input file display
-        [...lines not shown...]
 
     Base assignment number on contents of TEST
 
