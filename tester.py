@@ -4,7 +4,7 @@
 # The list TEST specifies which of this assignment's programs(s) to test.  Don't forget
 # the .py suffix!
 #
-TEST = ["fake-news.py"]
+TEST = ["fake-news.pyx"]
 
 #
 # If STOP_ON_FIRST_DIFF is True the tester stops after the the first difference is encountered.
@@ -380,10 +380,30 @@ def show_input(fname):
         f.close()
     except Exception as e:
         print(e)
+
+def get_assignment(argv):
+    if len(argv) == 0 or "-" not in argv[0]:
+        return get_assignment_based_on_tests()
+    else:
+        return re.split(r'[/\\]',argv[0])[-1].split("-")[0]  # todo: switch to os-independent path handling
+
+def get_assignment_based_on_tests():
+    for aname, programs in get_configs().items():
+        for testprog in TEST:
+            for program in programs:
+                if testprog == program.get_name():
+                    return aname
+
+    print("\nSorry! I can't figure out which assignment you're trying to test.")
+    print("Either the tester must have a name like aN-tester.py or the variable TEST")
+    print("in the tester source code (near the top) must specify a known program name.")
+    sys.exit(1)
+
+f=get_assignment_based_on_tests
         
 def main():
     print_header()
-    assignment=re.split(r'[/\\]',sys.argv[0])[-1].split("-")[0]  # todo: switch to os-independent path handling
+    assignment = get_assignment(sys.argv)
 
     diff_file = DiffFile(assignment)
     
