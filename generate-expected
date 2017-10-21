@@ -1,0 +1,9 @@
+#
+# for each PROG-input-*.txt file, an empty PROG-expected-*.txt file is created
+#
+for i in $(ls *-input-*.txt)
+do
+    expected=$(echo $i | sed s/-input-/-expected-/)
+    cp /dev/null $expected
+    chmod 644 $expected
+done
