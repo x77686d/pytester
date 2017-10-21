@@ -4,7 +4,7 @@
 # The list TEST specifies which of this assignment's programs(s) to test.  Don't forget
 # the .py suffix!
 #
-TEST = ["dates.py"]
+TEST = ["fake-news.py"]
 
 #
 # If STOP_ON_FIRST_DIFF is True the tester stops after the the first difference is encountered.
@@ -21,7 +21,7 @@ DIFF_TYPE=difflib.unified_diff
 
 ####### End of commonly adjusted settings for students #######
 
-VERSION = "1.11"
+VERSION = "1.12"
 
 from pathlib import Path
 import argparse
@@ -58,6 +58,7 @@ def get_configs():
         'a5': [Program("ngrams.py", post_process="sort"), Program("bball.py", post_process="sort")],
         'a6': [Program("battleship.py"), Program("rhymes-oo.py", post_process="sort,uniq")],
         'a7': [Program("dates.py")],
+        'a8': [Program("fake-news.py")],
         'ver': [Program("version.py")]
         }
 
@@ -397,12 +398,21 @@ def main():
         print("Are you perhaps off the net?")
         #print(dir(e),e.args,e.reason,e.strerror,e.with_traceback)
 
-    diff_file.finish()
+    except KeyboardInterrupt:
+        print("Interrupted!")
+        diff_file.finish()
 
 main()
 
 """
 Fix:
+    Catch ^C and write diff file (done?)
+
+    Work on "..." in input file display
+        [...lines not shown...]
+
+    Base assignment number on contents of TEST
+
     Have links and such for no differences cases
 
     Add an "Update in Progress" message via version.txt?
