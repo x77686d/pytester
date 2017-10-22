@@ -21,7 +21,7 @@ DIFF_TYPE=difflib.unified_diff
 
 ####### End of commonly adjusted settings for students #######
 
-VERSION = "1.15"
+VERSION = "1.16"
 
 from pathlib import Path
 import argparse
@@ -359,7 +359,10 @@ def post_process(lines, operations):
 def fake_news_sort(lines):
     prefix = "File: N: "
     if lines[0].startswith(prefix):
-        lines[0] = lines[0][len(prefix):]
+        line = lines[0]
+        lines.pop(0)
+        lines.insert(0,line[:len(prefix)] + "\n")
+        lines.insert(1,line[len(prefix):])
 
     result = []
     last_count = None
@@ -381,6 +384,8 @@ def fake_news_sort(lines):
         last_count = count
 
     result += sorted(batch)
+
+    #print(result)
         
     return result
 
