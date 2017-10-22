@@ -21,7 +21,7 @@ DIFF_TYPE=difflib.unified_diff
 
 ####### End of commonly adjusted settings for students #######
 
-VERSION = "1.14"
+VERSION = "1.15"
 
 from pathlib import Path
 import argparse
@@ -58,7 +58,7 @@ def get_configs():
         'a5': [Program("ngrams.py", post_process="sort"), Program("bball.py", post_process="sort")],
         'a6': [Program("battleship.py"), Program("rhymes-oo.py", post_process="sort,uniq")],
         'a7': [Program("dates.py")],
-        'a8': [Program("fake-news.py")],
+        'a8': [Program("fake-news.py", post_process="fake_news_sort")],
         'ver': [Program("version.py")]
         }
 
@@ -347,12 +347,43 @@ def post_process(lines, operations):
             lines = list(map(str.upper, lines))
         elif op == "lower":
             lines = list(map(str.lower, lines))
+        elif op == "fake_news_sort":
+            lines = fake_news_sort(lines)
         else:
             print("\nOops! Tester configuration error: no such operation as '{}'".format(op))
             print("Tell Dr. O'Bagy about this!")
             sys.exit()
 
     return lines
+
+def fake_news_sort(lines):
+    prefix = "File: N: "
+    if lines[0].startswith(prefix):
+        lines[0] = lines[0][len(prefix):]
+
+    result = []
+    last_count = None
+    batch = []
+    for line in lines:
+        try:
+            count = int(line.split()[-1])
+        except:
+            count = "x"
+
+        #print(line, count, last_count)
+        if last_count == None or count == last_count:
+            batch.append(line)
+        else:
+            #print(batch)
+            result += sorted(batch)
+            batch = [line]
+
+        last_count = count
+
+    result += sorted(batch)
+        
+    return result
+
 
 def uniq(L):
     result = []
