@@ -4,7 +4,7 @@
 # The list TEST specifies which of this assignment's programs(s) to test.  Don't forget
 # the .py suffix!
 #
-TEST = ["fake-news.py"]
+TEST = ["friends.py"]
 
 #
 # If STOP_ON_FIRST_DIFF is True the tester stops after the the first difference is encountered.
@@ -21,10 +21,11 @@ DIFF_TYPE=difflib.unified_diff
 
 ####### End of commonly adjusted settings for students #######
 
-VERSION = "1.16"
+VERSION = "1.17"
 
 from pathlib import Path
 import argparse
+import math
 import os
 import platform
 import re
@@ -59,6 +60,7 @@ def get_configs():
         'a6': [Program("battleship.py"), Program("rhymes-oo.py", post_process="sort,uniq")],
         'a7': [Program("dates.py")],
         'a8': [Program("fake-news.py", post_process="fake_news_sort")],
+        'a9': [Program("friends.py")],
         'ver': [Program("version.py")]
         }
 
@@ -404,7 +406,7 @@ def print_header():
     print("CSC 120 Tester, version {}".format(VERSION))
     print("Python version:")
     print(sys.version)
-    print("os.name: {}, platform: {}".format(os.name, platform.platform()))
+    print("os.name: {}, platform: {}, bits: {}".format(os.name, platform.platform(), int(math.log(sys.maxsize,2))+1))
     print()
 
 def show_input(fname):
