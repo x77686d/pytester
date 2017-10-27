@@ -162,6 +162,7 @@ class DiffFile:
             h2 { font-size: 1.1em; margin-left: 1em }
             pre { margin-left: 3em }
             .notice { color: red; font-size: 2em; text-decoration underline; font-weight: bold }
+            .disclaimer { font-size: 1.2em; }
         </style>
     </head>
     
@@ -181,6 +182,9 @@ class DiffFile:
 
     def finish(self):
         self._write_file_footer()
+        disc = get_disclaimer()
+        self._file.write("\n\n<span class=disclaimer><b>{}</b> {} <u>{}</u></span>".format(*disc))
+
         self._file.close()
     
 
@@ -444,6 +448,12 @@ def get_assignment_based_on_tests():
     print("in the tester source code (near the top) must specify a known program name.")
     sys.exit(1)
 
+def get_disclaimer():
+    return ["NOTE:",
+            "This tester gives you an automated way to confirm that your programs are producing the expected output for the examples shown in the assignment specifications, including error cases.",
+            "Passing the test cases does not guarantee any particular grade: additional and/or different test cases will be included when grading."
+            ]
+
 f=get_assignment_based_on_tests
         
 def main():
@@ -485,15 +495,15 @@ def main():
         diff_file.note_interrupted()
 
     finally:
+        print("\n\n" + " ".join(get_disclaimer()))
         diff_file.finish()
 
 main()
 
 """
 Fix:
-    Base assignment number on contents of TEST
 
-    Have links and such for no differences cases
+    Have links and such for no differences cases?
 
     Add an "Update in Progress" message via version.txt?
         Just swap in a new directory?  (why the spaces? -- whm)
@@ -512,6 +522,8 @@ Discuss:
         aN-tester.py and test-aN directory
     Understanding diffs
     Show test input when there's a diff
+
+The tester gives you an automated way to confirm that your programs are producing the expected output for the examples shown in the assignment specifications, including error cases. Passing the test cases does not guarantee any particular grade: additional test cases will be included when grading. (IN RED, and CHECK SPELLING!)
     
 
 """
