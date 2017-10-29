@@ -153,7 +153,7 @@ class DiffFile:
                   content="text/html; charset=utf-8" />
             <title></title>
             <style type="text/css">
-                table.diff {font-family:Courier; border:medium; margin-left: 3em}
+                table.diff {font-family:Courier; border:1px solid black; margin-left: 3em}
                 .diff_header {background-color:#e0e0e0}
                 td.diff_header {text-align:right}
                 .diff_next {background-color:#c0c0c0}
