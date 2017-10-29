@@ -69,17 +69,19 @@ class DiffFile:
         self._assignment = assignment
         self._file = open("diff.html", "w")
         self._write_file_header()
-        self._had_a_diff = False
 
-    def add_diff(self, program_fname, test_num, expected_fname, expected_lines, actual_fname, actual_lines, stdin_fname):
+    def add_diff(self, program_fname, test_num, expected_fname, expected_lines, actual_fname, actual_lines, stdin_fname, passed):
         LIMIT_INPUT_FILE_TEXT = 5000
-        self._had_a_diff = True
+        PASSED_VARIANTS = ["Difference", "Success", "inline-block", "none"]
         self._file.write("""
-            <h1>Difference on <code>{0}</code> test {1}</h1>
-            <h2>Input: (<code><a href='{2}'>{2}</a></code>)</h2>
+            <h1 onclick="output_view(this)">{0} on <code>{1}</code> test {2}</h1>
+            {3}
+            <br>
+            <div class="test-display" style="display: {4};">
+            <h2>Input: (<code><a href='{5}'>{5}</a></code>)</h2>
             <table class="diff" rules="groups">
             <colgroup></colgroup>
-            <tbody>""".format(program_fname, int(test_num), stdin_fname))
+            <tbody>""".format(PASSED_VARIANTS[passed], program_fname, int(test_num), ('<div class="arrow" onclick="output_view(this)"></div>' * passed), PASSED_VARIANTS[passed + 2], stdin_fname))
 
         test_files = []
         test_file_headers = []
@@ -111,9 +113,9 @@ class DiffFile:
                 else:
                     file_text = file_text[:LIMIT_INPUT_FILE_TEXT]
                     discarded = file_len - LIMIT_INPUT_FILE_TEXT
-                    
+
                 file_text += "[...{} additional characters not shown...]".format(discarded)
-                
+
             self._file.write(""" 
             <div style="display: inline-block; position: relative; margin-top: 20px; margin-left: 5%; width: {0}%;"><div style="background-color: white; border:3px solid black; position: relative; height: 30px; width:100%; top:2px; z-index:9; text-align: center; left: 50%; transform: translate(-50%, 0); overflow: hidden;"><span style="position: relative; top: 5px; font-family: Courier; font-weight: 600;">{1}</span></div>
             <textarea spellcheck="false" autocapitalize="off" autocorrect="off" autocomplete="off" style="overflow: auto; background-color: #e0e0e0; position: relative; white-space: pre; left: 50%; transform: translate(-50%, 0); width:97%; height: 200px; box-shadow: inset 0px 2px 5px 5px #888888; z-index:8; top:-20px; outline: none; font-family: Courier; border: none; resize: none; padding-left: 1%; box-sizing: border-box; -webkit-box-sizing: border-box;" readonly>{2}</textarea></div>
@@ -121,13 +123,13 @@ class DiffFile:
             open_file.close()
 
         self._file.write("""
-            <h2>Diff:</h2>""")
+            <h2>Output:</h2>""")
 
         htmldiff = difflib.HtmlDiff().make_table(expected_lines, actual_lines, fromdesc=expected_fname, todesc=actual_fname)
 
         self._file.write(self._add_file_links(htmldiff, expected_fname, actual_fname))
 
-        self._file.write("<br><br>")
+        self._file.write("</div><br><br>")
         
     def close(self):
         self._write_html_footer()
@@ -141,41 +143,53 @@ class DiffFile:
     
     def _write_file_header(self):
         self._file.write("""
-    <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-              "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+        <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+        <html>
+
+        <head>
+            <meta http-equiv="Content-Type"
+                  content="text/html; charset=utf-8" />
+            <title></title>
+            <style type="text/css">
+                table.diff {font-family:Courier; border:medium; margin-left: 3em}
+                .diff_header {background-color:#e0e0e0}
+                td.diff_header {text-align:right}
+                .diff_next {background-color:#c0c0c0}
+                .diff_add {background-color:#aaffaa}
+                .diff_chg {background-color:#ffff77}
+                .diff_sub {background-color:#ffaaaa}
+                h1 { font-size: 1.2em; text-decoration: underline; display: inline-block;}
+                h1:hover {cursor: pointer;}
+                h2 { font-size: 1.1em; margin-left: 1em }
+                pre { margin-left: 3em }
+                .notice { color: red; font-size: 2em; text-decoration underline; font-weight: bold }
+                .disclaimer { font-size: 1.2em; border: solid 1px; padding: .5em; font-family: sans-serif }
+                .arrow {height: 0px; width: 0px; border-top: 10px solid black; border-left: 6px solid transparent; border-right: 6px solid transparent; transform: rotate(270deg); display:inline-block;}
+                .arrow:hover {cursor: pointer;}
+            </style>
+            <script>
+            var output_view = function(elem) {
+                arrow_elem = elem;
+                if (arrow_elem.className != "arrow") {
+                    arrow_elem = elem.nextElementSibling;
+                }
+                if (arrow_elem.style.transform != "rotate(0deg)") {
+                    arrow_elem.nextElementSibling.nextElementSibling.style.display = "inline-block";
+                    arrow_elem.style.transform = "rotate(0deg)"
+                } else {
+                    arrow_elem.nextElementSibling.nextElementSibling.style.display = "none";
+                    arrow_elem.style.transform = "rotate(270deg)"
+                }
+            }
+            </script>
+
+        <body>
+            """)
     
-    <html>
-    
-    <head>
-        <meta http-equiv="Content-Type"
-              content="text/html; charset=utf-8" />
-        <title></title>
-        <style type="text/css">
-            table.diff {font-family:Courier; border:medium; margin-left: 3em}
-            .diff_header {background-color:#e0e0e0}
-            td.diff_header {text-align:right}
-            .diff_next {background-color:#c0c0c0}
-            .diff_add {background-color:#aaffaa}
-            .diff_chg {background-color:#ffff77}
-            .diff_sub {background-color:#ffaaaa}
-            h1 { font-size: 1.2em; text-decoration: underline }
-            h2 { font-size: 1.1em; margin-left: 1em }
-            pre { margin-left: 3em }
-            .notice { color: red; font-size: 2em; text-decoration underline; font-weight: bold }
-            .disclaimer { font-size: 1.2em; }
-        </style>
-    </head>
-    
-    <body>
-        """)
-    
-    
-    def _write_file_footer(self):
-        if (self._had_a_diff):
-            self._file.write('<table class="diff" summary="Legends"> <tr> <th colspan="2"> Legends </th> </tr> <tr> <td> <table border="" summary="Colors"> <tr><th> Colors </th> </tr> <tr><td class="diff_add">&nbsp;Added&nbsp;</td></tr> <tr><td class="diff_chg">Changed</td> </tr> <tr><td class="diff_sub">Deleted</td> </tr> </table></td> <td> <table border="" summary="Links"> <tr><th colspan="2"> Links </th> </tr> <tr><td>(f)irst change</td> </tr> <tr><td>(n)ext change</td> </tr> <tr><td>(t)op</td> </tr> </table></td> </tr> </table>')
-        else:
-            self._file.write('<h1>No differences!</h1>')
-        self._file.write('</body></html>')
+    def _write_file_footer(self):        
+        self._file.write('<table class="diff" summary="Legends"> <tr> <th colspan="2"> Legends </th> </tr> <tr> <td> <table border="" summary="Colors"> <tr><th> Colors </th> </tr> <tr><td class="diff_add">&nbsp;Added&nbsp;</td></tr> <tr><td class="diff_chg">Changed</td> </tr> <tr><td class="diff_sub">Deleted</td> </tr> </table></td> <td> <table border="" summary="Links"> <tr><th colspan="2"> Links </th> </tr> <tr><td>(f)irst change</td> </tr> <tr><td>(n)ext change</td> </tr> <tr><td>(t)op</td> </tr> </table></td> </tr> </table>')
 
     def note_interrupted(self):
         self._file.write("<p class=notice>NOTE: Tester execution interrupted; not all tests were completed.")
@@ -331,6 +345,8 @@ def run_tests(program_spec, assignment, diff_file):
             
         if len(diff_str) == 0:
             print("PASSED")
+            diff_file.add_diff(program_fname, test_num,
+                expected_fname, expected_lines, actual_fname, actual_lines, stdin_fname, True)
         else:
             print("FAILED")
 
@@ -338,7 +354,7 @@ def run_tests(program_spec, assignment, diff_file):
             print(diff_str)
 
             diff_file.add_diff(program_fname, test_num,
-                expected_fname, expected_lines, actual_fname, actual_lines, stdin_fname)
+                expected_fname, expected_lines, actual_fname, actual_lines, stdin_fname, False)
                 
             if STOP_ON_FIRST_DIFF:
                 break
