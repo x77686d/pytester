@@ -174,6 +174,9 @@ class DiffFile:
                 arrow_elem = elem;
                 if (arrow_elem.className != "arrow") {
                     arrow_elem = elem.nextElementSibling;
+                    if (arrow_elem.className != "arrow") {
+                        return;
+                    }
                 }
                 if (arrow_elem.style.transform != "rotate(0deg)") {
                     arrow_elem.nextElementSibling.nextElementSibling.style.display = "inline-block";
@@ -184,7 +187,6 @@ class DiffFile:
                 }
             }
             </script>
-
         <body>
             """)
     
