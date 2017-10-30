@@ -60,7 +60,7 @@ def get_configs():
         'a6': [Program("battleship.py"), Program("rhymes-oo.py", post_process="sort,uniq")],
         'a7': [Program("dates.py")],
         'a8': [Program("fake-news.py", post_process="fake_news_sort")],
-        'a9': [Program("friends.py")],
+        'a9': [Program("friends.py", post_process="friends_sort")],
         'ver': [Program("version.py")]
         }
 
@@ -162,7 +162,7 @@ class DiffFile:
             h2 { font-size: 1.1em; margin-left: 1em }
             pre { margin-left: 3em }
             .notice { color: red; font-size: 2em; text-decoration underline; font-weight: bold }
-            .disclaimer { font-size: 1.2em; }
+            .disclaimer { font-size: 1.2em; border: solid 1px; padding: .5em; font-family: sans-serif }
         </style>
     </head>
     
@@ -183,7 +183,7 @@ class DiffFile:
     def finish(self):
         self._write_file_footer()
         disc = get_disclaimer()
-        self._file.write("\n\n<span class=disclaimer><b>{}</b> {} <u>{}</u></span>".format(*disc))
+        self._file.write("<br><br><div class=disclaimer><b>{}</b> {} <u>{}</u></div>".format(*disc))
 
         self._file.close()
     
@@ -355,6 +355,8 @@ def post_process(lines, operations):
             lines = list(map(str.lower, lines))
         elif op == "fake_news_sort":
             lines = fake_news_sort(lines)
+        elif op == "friends_sort":
+            lines = friends_sort(lines)
         else:
             print("\nOops! Tester configuration error: no such operation as '{}'".format(op))
             print("Tell Dr. O'Bagy about this!")
@@ -395,6 +397,11 @@ def fake_news_sort(lines):
         
     return result
 
+def friends_sort(lines):
+    if len(lines) == 0:
+        return lines
+    else:
+        return [lines[0]] + sorted(lines[1:])
 
 def uniq(L):
     result = []
@@ -426,7 +433,13 @@ def show_input(fname):
 
 def get_assignment(argv):
     aN_pattern = r'(a\d+)-.*'
-    match = re.match(aN_pattern, argv[0])
+
+    if len(argv) != 0:
+        program = Path(argv[0]).name
+    else:
+        program = ""
+
+    match = re.match(aN_pattern, program)
     if len(argv) == 0 or not match:
         print("Note: Determining assignment based on first program in TEST list...", end="")
         assignment = get_assignment_based_on_tests()
@@ -522,8 +535,5 @@ Discuss:
         aN-tester.py and test-aN directory
     Understanding diffs
     Show test input when there's a diff
-
-The tester gives you an automated way to confirm that your programs are producing the expected output for the examples shown in the assignment specifications, including error cases. Passing the test cases does not guarantee any particular grade: additional test cases will be included when grading. (IN RED, and CHECK SPELLING!)
-    
 
 """
