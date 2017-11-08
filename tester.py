@@ -4,7 +4,9 @@
 # The list TEST specifies which of this assignment's programs(s) to test.  Don't forget
 # the .py suffix!
 #
-TEST = ["friends.py"]
+TEST = ["fake-news-ms.py"]
+TEST = ["street.py"]
+TEST = ["fake-news-ms.py", "street.py"]
 
 #
 # If STOP_ON_FIRST_DIFF is True the tester stops after the the first difference is encountered.
@@ -21,7 +23,7 @@ DIFF_TYPE=difflib.unified_diff
 
 ####### End of commonly adjusted settings for students #######
 
-VERSION = "1.18"
+VERSION = "1.19"
 
 from pathlib import Path
 import argparse
@@ -61,6 +63,7 @@ def get_configs():
         'a7': [Program("dates.py")],
         'a8': [Program("fake-news.py", post_process="fake_news_sort")],
         'a9': [Program("friends.py", post_process="friends_sort")],
+        'a11': [Program("fake-news-ms.py"), Program("street.py")],
         'ver': [Program("version.py")]
         }
 
