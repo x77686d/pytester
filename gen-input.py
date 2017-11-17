@@ -10,6 +10,15 @@
 #   (cd test-a9; rename -f s/actual/expected/ friends-actual-*)
 #   scp test-a9/friends-* lec:www120a/assg09/tester/.
 #
+# Assignment 11:
+#   put text of https://www2.cs.arizona.edu/classes/cs120/fall17/ASSIGNMENTS/assg11/street-examples.html on clipboard
+#   cb | grep Street: | sed 's/Street: //' > std-cases
+#   Added cases from https://www2.cs.arizona.edu/classes/cs120/fall17/ASSIGNMENTS/assg11/street.html  to std-cases
+#   < std-cases py3 ~/120/tester/gen-input.py a11 street l
+#   (cd test-a11; rename -f s/actual/expected/ street-actual-*)
+#   scp test-a11/street-[ie]* lec:www120a/assg11/tester/.
+#   lec chmod 664 www120a/assg11/tester/*
+#
 import sys
 def main():
     args = sys.argv[1:]
