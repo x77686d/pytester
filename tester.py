@@ -94,7 +94,7 @@ class DiffFile:
                 test_files.append(line.strip("\n"))
                 line = "<a href={0}>{0}</a>".format(line)
                 test_file_headers.append(line)
-            self._file.write("<tr><td>" + line + "\n")
+            self._file.write("<tr><td><pre style='margin:0;'>" + line + "</pre>\n")
 
         self._file.write(""" 
             </tbody>
@@ -148,9 +148,7 @@ class DiffFile:
         self._file.write("""
         <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
                   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
         <html>
-
         <head>
             <meta http-equiv="Content-Type"
                   content="text/html; charset=utf-8" />
@@ -536,21 +534,15 @@ main()
 
 """
 Fix:
-
     Have links and such for no differences cases?
-
     Add an "Update in Progress" message via version.txt?
         Just swap in a new directory?  (why the spaces? -- whm)
             Need a way to test with the new directory
                 --exp -- experimental directory
-
     Print warning if running in testerx mode
         Add an option for that mode
-
     Add option to override source file: -s dates.py=dates-whm.py
-
     Test for git experimentation.
-
 Discuss:
     aN naming convention
         aN-tester.py and test-aN directory

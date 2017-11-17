@@ -24,6 +24,9 @@ Source code, this document, and more are at <a href=https://github.com/x77686d/p
 <li>Add program(s) to <code>TEST</code> and <code>get_configs()</code> in <code>aN-tester.py</code>
 </ul>
 <h1>Directory set-up on lectura</h1>
+<ul>
+<li>Create <code>ASSIGNMENTS/assgN/tester</code>
+<li>
 <p>
 For <code>a7/dates.py</code>, did this:
 <pre>
@@ -33,9 +36,23 @@ do
     touch dates-expected-0$i.txt
 done
 </pre>
+<p>For a8 did this:
+<pre>
+put contents of https://www2.cs.arizona.edu/classes/cs120/fall17/ASSIGNMENTS/assg08/EXAMPLES-fake-news.html on clipboard
+mkdir test-a8
+cd test-a8
+cb | egrep "File:|N:" | xfield 2  | py3 gen-input.py
+tester/generate-expected
+scp fake-news-* lec:www120a/assg08/tester
+py3 a8-tester.py
+[generates test-a8/fake-news-expected-*]
+(cd test-a8; rename -f s/-actual-/-expected-/ fake-news-actual*)
+scp test-a8/fake-news-expected-* lec:www120a/assg08/tester
+</pre>
 
 After running locally, did this in <code>test-a7</code>:
 <pre>
 rename -f s/actual/expected/ dates-actual-0*
 scp dates-expected-0* lec:www120a/assgn07/tester
 </pre>
+</ul>
