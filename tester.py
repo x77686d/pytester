@@ -4,7 +4,9 @@
 # The list TEST specifies which of this assignment's programs(s) to test.  Don't forget
 # the .py suffix!
 #
-TEST = ["friends.py"]
+TEST = ["fake-news-ms.py"]
+TEST = ["street.py"]
+TEST = ["fake-news-ms.py", "street.py"]
 
 #
 # If STOP_ON_FIRST_DIFF is True the tester stops after the the first difference is encountered.
@@ -21,7 +23,7 @@ DIFF_TYPE=difflib.unified_diff
 
 ####### End of commonly adjusted settings for students #######
 
-VERSION = "1.18"
+VERSION = "1.19"
 
 from pathlib import Path
 import argparse
@@ -60,7 +62,8 @@ def get_configs():
         'a6': [Program("battleship.py"), Program("rhymes-oo.py", post_process="sort,uniq")],
         'a7': [Program("dates.py")],
         'a8': [Program("fake-news.py", post_process="fake_news_sort")],
-        'a9': [Program("friends.py")],
+        'a9': [Program("friends.py", post_process="friends_sort")],
+        'a11': [Program("fake-news-ms.py"), Program("street.py")],
         'ver': [Program("version.py")]
         }
 
@@ -91,7 +94,7 @@ class DiffFile:
                 test_files.append(line.strip("\n"))
                 line = "<a href={0}>{0}</a>".format(line)
                 test_file_headers.append(line)
-            self._file.write("<tr><td>" + line + "\n")
+            self._file.write("<tr><td><pre style='margin:0;'>" + line + "</pre>\n")
 
         self._file.write(""" 
             </tbody>
@@ -145,9 +148,7 @@ class DiffFile:
         self._file.write("""
         <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
                   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
         <html>
-
         <head>
             <meta http-equiv="Content-Type"
                   content="text/html; charset=utf-8" />
@@ -199,7 +200,7 @@ class DiffFile:
     def finish(self):
         self._write_file_footer()
         disc = get_disclaimer()
-        self._file.write("\n\n<span class=disclaimer><b>{}</b> {} <u>{}</u></span>".format(*disc))
+        self._file.write("<br><br><div class=disclaimer><b>{}</b> {} <u>{}</u></div>".format(*disc))
 
         self._file.close()
     
@@ -373,6 +374,8 @@ def post_process(lines, operations):
             lines = list(map(str.lower, lines))
         elif op == "fake_news_sort":
             lines = fake_news_sort(lines)
+        elif op == "friends_sort":
+            lines = friends_sort(lines)
         else:
             print("\nOops! Tester configuration error: no such operation as '{}'".format(op))
             print("Tell Dr. O'Bagy about this!")
@@ -413,6 +416,11 @@ def fake_news_sort(lines):
         
     return result
 
+def friends_sort(lines):
+    if len(lines) == 0:
+        return lines
+    else:
+        return [lines[0]] + sorted(lines[1:])
 
 def uniq(L):
     result = []
@@ -444,7 +452,13 @@ def show_input(fname):
 
 def get_assignment(argv):
     aN_pattern = r'(a\d+)-.*'
-    match = re.match(aN_pattern, argv[0])
+
+    if len(argv) != 0:
+        program = Path(argv[0]).name
+    else:
+        program = ""
+
+    match = re.match(aN_pattern, program)
     if len(argv) == 0 or not match:
         print("Note: Determining assignment based on first program in TEST list...", end="")
         assignment = get_assignment_based_on_tests()
@@ -520,28 +534,18 @@ main()
 
 """
 Fix:
-
     Have links and such for no differences cases?
-
     Add an "Update in Progress" message via version.txt?
         Just swap in a new directory?  (why the spaces? -- whm)
             Need a way to test with the new directory
                 --exp -- experimental directory
-
     Print warning if running in testerx mode
         Add an option for that mode
-
     Add option to override source file: -s dates.py=dates-whm.py
-
     Test for git experimentation.
-
 Discuss:
     aN naming convention
         aN-tester.py and test-aN directory
     Understanding diffs
     Show test input when there's a diff
-
-The tester gives you an automated way to confirm that your programs are producing the expected output for the examples shown in the assignment specifications, including error cases. Passing the test cases does not guarantee any particular grade: additional test cases will be included when grading. (IN RED, and CHECK SPELLING!)
-    
-
 """
