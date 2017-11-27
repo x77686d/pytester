@@ -4,9 +4,7 @@
 # The list TEST specifies which of this assignment's programs(s) to test.  Don't forget
 # the .py suffix!
 #
-TEST = ["fake-news-ms.py"]
-TEST = ["street.py"]
-TEST = ["fake-news-ms.py", "street.py"]
+TEST = ["huffman.py"]
 
 #
 # If STOP_ON_FIRST_DIFF is True the tester stops after the the first difference is encountered.
@@ -23,7 +21,7 @@ DIFF_TYPE=difflib.unified_diff
 
 ####### End of commonly adjusted settings for students #######
 
-VERSION = "1.19"
+VERSION = "1.20"
 
 from pathlib import Path
 import argparse
@@ -64,6 +62,7 @@ def get_configs():
         'a8': [Program("fake-news.py", post_process="fake_news_sort")],
         'a9': [Program("friends.py", post_process="friends_sort")],
         'a11': [Program("fake-news-ms.py"), Program("street.py")],
+        'a12': [Program("huffman.py")],
         'ver': [Program("version.py")]
         }
 
@@ -206,7 +205,8 @@ class DiffFile:
     
 
 TESTER_URL_ROOT="http://www2.cs.arizona.edu/classes/cs120/fall17/ASSIGNMENTS/"
-#TESTER_URL_ROOT="http://www2.cs.arizona.edu/~whm/120/ASSIGNMENTS/"
+TESTER_URL_ROOT="http://www2.cs.arizona.edu/~whm/120/ASSIGNMENTS/"
+TESTER_URL_ROOT="http://www2.cs.arizona.edu/~whm/120-SHA1SUM/"
 
 
 def print_dot():
@@ -534,7 +534,9 @@ main()
 
 """
 Fix:
-    Have links and such for no differences cases?
+    If files only differ by a final newline, diff.html shows no evidence of the difference.
+        Look for difference being missing newline in actual
+    
     Add an "Update in Progress" message via version.txt?
         Just swap in a new directory?  (why the spaces? -- whm)
             Need a way to test with the new directory
@@ -543,6 +545,7 @@ Fix:
         Add an option for that mode
     Add option to override source file: -s dates.py=dates-whm.py
     Test for git experimentation.
+    
 Discuss:
     aN naming convention
         aN-tester.py and test-aN directory
