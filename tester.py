@@ -21,7 +21,7 @@ DIFF_TYPE=difflib.unified_diff
 
 ####### End of commonly adjusted settings for students #######
 
-VERSION = "1.20"
+VERSION = "1.21"
 
 from pathlib import Path
 import argparse
@@ -71,6 +71,11 @@ class DiffFile:
         self._assignment = assignment
         self._file = open("diff.html", "w")
         self._write_file_header()
+
+    def add_message(self, program_fname, test_num, msg):
+        self._file.write("<h1>Difference on <code>{0}</code> test {1}</h1><br>".format(program_fname, int(test_num)))
+        self._file.write("{}<br><br>".format(msg))
+
 
     def add_diff(self, program_fname, test_num, expected_fname, expected_lines, actual_fname, actual_lines, stdin_fname, passed):
         LIMIT_INPUT_FILE_TEXT = 5000
@@ -204,9 +209,8 @@ class DiffFile:
         self._file.close()
     
 
-TESTER_URL_ROOT="http://www2.cs.arizona.edu/classes/cs120/fall17/ASSIGNMENTS/"
-TESTER_URL_ROOT="http://www2.cs.arizona.edu/~whm/120/ASSIGNMENTS/"
 TESTER_URL_ROOT="http://www2.cs.arizona.edu/~whm/120-SHA1SUM/"
+TESTER_URL_ROOT="http://www2.cs.arizona.edu/classes/cs120/fall17/ASSIGNMENTS/"
 
 
 def print_dot():
@@ -353,11 +357,20 @@ def run_tests(program_spec, assignment, diff_file):
         else:
             print("FAILED")
 
-            show_input(stdin_fname)
-            print(diff_str)
+            #
+            # Special case quick fix for 120.f17 a12: If actual_lines is only missing a final newline,
+            # state that.
+            if "".join(expected_lines) == "".join(actual_lines) + "\n":
+                msg = "NOTE: Your output is identical to the expected output EXCEPT that your output is missing a newline at the very end."
+                print(msg)
+                diff_file.add_message(program_fname, test_num, msg)
+            else:
+                show_input(stdin_fname)
+                print(diff_str)
 
-            diff_file.add_diff(program_fname, test_num,
-                expected_fname, expected_lines, actual_fname, actual_lines, stdin_fname, False)
+                diff_file.add_diff(program_fname, test_num,
+                    expected_fname, expected_lines, actual_fname, actual_lines, stdin_fname, False)
+                    
                 
             if STOP_ON_FIRST_DIFF:
                 break
