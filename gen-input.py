@@ -19,6 +19,18 @@
 #   scp test-a11/street-[ie]* lec:www120a/assg11/tester/.
 #   lec chmod 664 www120a/assg11/tester/*
 #
+# Assignment 12:
+#   Edited https://piazza.com/class/j6bfy03k6bf5bb?cid=687 down to piazza-cases.txt
+#   Wrote gen-huffman-nn.py
+"""
+   py3 gen-huffman-nn.py  < piazza-cases.txt
+   (cd test-a12; ls huffman.??) | py3 ~/120/tester/gen-input.py a12 huffman f
+   py3 a12-tester.py
+   (cd test-a12; rename -f s/actual/expected/ huffman-actual-*)
+   scp test-a12/{huffman-[ie]*,huffman.*} $(cat www)/assg12/tester
+   lec chmod 664 www-120-hidden/assg12/tester/*
+"""
+#
 import sys
 def main():
     args = sys.argv[1:]
@@ -34,6 +46,9 @@ def main():
         line = sys.stdin.readline()
         if line == "":
             break
+
+        if line[0] == "#":
+            continue
 
         if (line_num - 1) % len(descriptors) == 0:
             print("line_num", line_num, "-- opening file")
