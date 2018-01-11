@@ -31,6 +31,16 @@
    lec chmod 664 www-120-hidden/assg12/tester/*
 """
 #
+# Assignment 13:
+#
+"""
+    Put text on https://www2.cs.arizona.edu/classes/cs120/fall17/ASSIGNMENTS/assg13/EXAMPLES-phylo.html on clipboard
+    cb | grep -i "input file =" | xfield -d' ;' 4 7 | tr ' ' \\n | py3 gen-input.py a13 phylo.py fl
+   (cd test-a13; rename -f s/actual/expected/ phylo-actual-*)
+   scp test-a13/{phylo-[ie]*} lec:www-120-hidden/assg13/tester
+   lec chmod 664 www-120-hidden/assg13/tester/*
+"""
+
 import sys
 def main():
     args = sys.argv[1:]
