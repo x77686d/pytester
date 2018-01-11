@@ -4,7 +4,7 @@
 # The list TEST specifies which of this assignment's programs(s) to test.  Don't forget
 # the .py suffix!
 #
-TEST = ["huffman.py"]
+TEST = ["phylo.py"]
 
 #
 # If STOP_ON_FIRST_DIFF is True the tester stops after the the first difference is encountered.
@@ -63,6 +63,7 @@ def get_configs():
         'a9': [Program("friends.py", post_process="friends_sort")],
         'a11': [Program("fake-news-ms.py"), Program("street.py")],
         'a12': [Program("huffman.py")],
+        'a13': [Program("phylo.py")],
         'ver': [Program("version.py")]
         }
 
@@ -208,10 +209,7 @@ class DiffFile:
 
         self._file.close()
     
-
-TESTER_URL_ROOT="http://www2.cs.arizona.edu/~whm/120-SHA1SUM/"
 TESTER_URL_ROOT="http://www2.cs.arizona.edu/classes/cs120/fall17/ASSIGNMENTS/"
-
 
 def print_dot():
     print(".", end="")
@@ -549,6 +547,7 @@ main()
 Fix:
     If files only differ by a final newline, diff.html shows no evidence of the difference.
         Look for difference being missing newline in actual
+        See https://mail.python.org/pipermail/python-dev/2010-October/104501.html
     
     Add an "Update in Progress" message via version.txt?
         Just swap in a new directory?  (why the spaces? -- whm)
