@@ -4,7 +4,9 @@
 # The list TEST specifies which of this assignment's programs(s) to test.  Don't forget
 # the .py suffix!
 #
-TEST = ["phylo.py"]
+#TEST = ["word-grid.py"]
+#TEST = ["word-search.py"]
+TEST = ["word-grid.py", "word-search.py"]
 
 #
 # If STOP_ON_FIRST_DIFF is True the tester stops after the the first difference is encountered.
@@ -21,7 +23,7 @@ DIFF_TYPE=difflib.unified_diff
 
 ####### End of commonly adjusted settings for students #######
 
-VERSION = "1.21"
+VERSION = "1.22"
 
 from pathlib import Path
 import argparse
@@ -54,6 +56,7 @@ class Program:
 
 def get_configs():
     return {
+        'a1': [Program("word-grid.py"), Program("word-search.py", post_process="sort")],
         'a3': [Program("rhymes.py")],
         'a4': [Program("abundance.py"), Program("biodiversity.py")],
         'a5': [Program("ngrams.py", post_process="sort"), Program("bball.py", post_process="sort")],
@@ -209,7 +212,7 @@ class DiffFile:
 
         self._file.close()
     
-TESTER_URL_ROOT="http://www2.cs.arizona.edu/classes/cs120/fall17/ASSIGNMENTS/"
+TESTER_URL_ROOT="http://www2.cs.arizona.edu/classes/cs120/spring18/ASSIGNMENTS/"
 
 def print_dot():
     print(".", end="")
@@ -309,7 +312,8 @@ def get_tests(program, assignment):
 
     return sorted(result)
 
-def run_tests(program_spec, assignment, diff_file):
+
+def run_tests(program_spec, assignment, diff_file): 
     program_fname = program_spec.get_name()
     program_basename = program_fname.split(".")[0]
 
@@ -336,6 +340,8 @@ def run_tests(program_spec, assignment, diff_file):
         
         expected_lines = expected_file.readlines()
         actual_lines = actual_file.readlines()
+        #TODO: Add trailing newline check here
+        
         
         expected_file.close()
         actual_file.close()
@@ -393,6 +399,7 @@ def post_process(lines, operations):
             sys.exit()
 
     return lines
+
 
 def fake_news_sort(lines):
     prefix = "File: N: "
