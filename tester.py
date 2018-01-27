@@ -4,9 +4,7 @@
 # The list TEST specifies which of this assignment's programs(s) to test.  Don't forget
 # the .py suffix!
 #
-#TEST = ["word-grid.py"]
-#TEST = ["word-search.py"]
-TEST = ["word-grid.py", "word-search.py"]
+TEST = ["pokemon.py"]
 
 #
 # If STOP_ON_FIRST_DIFF is True the tester stops after the the first difference is encountered.
@@ -20,6 +18,7 @@ import difflib
 #
 DIFF_TYPE=difflib.context_diff
 DIFF_TYPE=difflib.unified_diff
+
 
 ####### End of commonly adjusted settings for students #######
 
@@ -56,7 +55,8 @@ class Program:
 
 def get_configs():
     return {
-        'a1': [Program("word-grid.py"), Program("word-search.py", post_process="sort")],
+        'a1': [Program("word-grid.py"), Program("word-search.py")],
+        'a2': [Program("pokemon.py")],
         'a3': [Program("rhymes.py")],
         'a4': [Program("abundance.py"), Program("biodiversity.py")],
         'a5': [Program("ngrams.py", post_process="sort"), Program("bball.py", post_process="sort")],
@@ -337,17 +337,27 @@ def run_tests(program_spec, assignment, diff_file):
         expected_fname = "{}/{}-expected-{}.txt".format(test_dir, program_basename, test_num)
         expected_file = open(expected_fname, "r")
         actual_file = open(actual_fname,"r")
-        
+
+        tags = []
         expected_lines = expected_file.readlines()
+
+        #Check expected output for tag line, create tags if it exists.
+        if len(expected_lines) > 0 and expected_lines[0].startswith("#!"):
+            tags = expected_lines[0].lstrip("#! ").rstrip().split()
+            expected_lines = expected_lines[1:]
+        
         actual_lines = actual_file.readlines()
         #TODO: Add trailing newline check here
-        
         
         expected_file.close()
         actual_file.close()
 
         expected_lines = post_process(expected_lines, program_spec.get_post_process())
         actual_lines = post_process(actual_lines, program_spec.get_post_process())
+
+        #Post process based on tags
+        expected_lines = post_process(expected_lines, tags)
+        actual_lines = post_process(actual_lines, tags)
             
         diff = DIFF_TYPE(expected_lines, actual_lines, fromfile=expected_fname, tofile=actual_fname)
         diff_str = ""
