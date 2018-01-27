@@ -22,7 +22,8 @@ DIFF_TYPE=difflib.unified_diff
 
 ####### End of commonly adjusted settings for students #######
 
-VERSION = "1.22"
+VERSION = "1.23"
+TAG_INDICATOR = "#!"
 
 from pathlib import Path
 import argparse
@@ -342,8 +343,8 @@ def run_tests(program_spec, assignment, diff_file):
         expected_lines = expected_file.readlines()
 
         #Check expected output for tag line, create tags if it exists.
-        if len(expected_lines) > 0 and expected_lines[0].startswith("#!"):
-            tags = expected_lines[0].lstrip("#! ").rstrip().split()
+        if len(expected_lines) > 0 and expected_lines[0].startswith(TAG_INDICATOR):
+            tags = expected_lines[0].lstrip(TAG_INDICATOR + " ").rstrip().split()
             expected_lines = expected_lines[1:]
         
         actual_lines = actual_file.readlines()
