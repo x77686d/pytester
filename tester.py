@@ -566,6 +566,8 @@ Fix:
     If files only differ by a final newline, diff.html shows no evidence of the difference.
         Look for difference being missing newline in actual
         See https://mail.python.org/pipermail/python-dev/2010-October/104501.html
+
+        Note: This was partially addressed by e3a9ce.
     
     Add an "Update in Progress" message via version.txt?
         Just swap in a new directory?  (why the spaces? -- whm)
