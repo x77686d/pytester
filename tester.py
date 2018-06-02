@@ -4,7 +4,7 @@
 # The list TEST specifies which of this assignment's programs(s) to test.  Don't forget
 # the .py suffix!
 #
-TEST = ["pokemon.py"]
+TEST = ["phylo.py"]
 
 #
 # If STOP_ON_FIRST_DIFF is True the tester stops after the the first difference is encountered.
@@ -22,7 +22,7 @@ DIFF_TYPE=difflib.unified_diff
 
 ####### End of commonly adjusted settings for students #######
 
-VERSION = "1.23"
+VERSION = "1.25"
 TAG_INDICATOR = "#!"
 
 from pathlib import Path
@@ -58,16 +58,16 @@ def get_configs():
     return {
         'a1': [Program("word-grid.py"), Program("word-search.py")],
         'a2': [Program("pokemon.py")],
-        'a3': [Program("rhymes.py")],
-        'a4': [Program("abundance.py"), Program("biodiversity.py")],
+        'a3': [Program("rhymes.py", post_process="sort")],
+        'a4': [Program("abundance.py", post_process="sort"), Program("biodiversity.py", post_process="sort")],
         'a5': [Program("ngrams.py", post_process="sort"), Program("bball.py", post_process="sort")],
-        'a6': [Program("battleship.py"), Program("rhymes-oo.py", post_process="sort,uniq")],
-        'a7': [Program("dates.py")],
+        'a6': [Program("dates.py"), Program("rhymes-oo.py", post_process="sort,uniq")],
+        'a7': [Program("battleship.py")],
         'a8': [Program("fake-news.py", post_process="fake_news_sort")],
         'a9': [Program("friends.py", post_process="friends_sort")],
-        'a11': [Program("fake-news-ms.py"), Program("street.py")],
-        'a12': [Program("huffman.py")],
-        'a13': [Program("phylo.py")],
+        'a10': [Program("fake-news-ms.py"), Program("street.py")],
+        'a11': [Program("huffman.py")],
+        'a12': [Program("phylo.py")],
         'ver': [Program("version.py")]
         }
 
